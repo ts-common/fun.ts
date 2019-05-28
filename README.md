@@ -12,6 +12,7 @@ Pure functional subset of JavaScripts/TypeScript.
   - write/read `.d.ts` files.
   - the subset should be valid JavaScript or TypeSctipt. So no need for additional transpilers, we only need a validator.
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
+- no implicit type conversions. For example `?:` should only accept `bool` type.
 
 ## Minimal Syntax
 
@@ -38,11 +39,7 @@ Pure functional subset of JavaScripts/TypeScript.
   - boolean `true` and `false`
   - array `[ "something" ]`
   - function `a => expression` | `a => { body }`. Yes, only one argument.
-- expressions
-  - `?:`
-  - `+`
-  - `-`
-  - ...
+- expressions: `?:`, `+`, `-`, `*`, `/`, `===`, `!==`, `<=`, `>=`, `>`, `<`.
 - body `{ ... }`
   - definitions
   - `return exp`
