@@ -44,8 +44,9 @@ Pure functional subset of JavaScripts/TypeScript.
   - arithmetic `+`, `-`, `*`, `/`, `%`, `**`
   - compare `===`, `!==`, `<=`, `>=`, `>`, `<`
   - logical `&&`, `||`, `!`
-  - bitwise `|`, `&`
-  - string interpolation.
+  - bitwise `|`, `&`, `^`, `~`, `<<`, `>>`, `>>>`
+  - string interpolation,
+  - `typeof`
 - body `{ ... }`
   ```js
   const name = expression
