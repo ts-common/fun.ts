@@ -41,5 +41,8 @@ Pure functional subset of JavaScripts/TypeScript.
   - function `a => expression` | `a => { body }`. Yes, only one argument.
 - expressions: `?:`, `+`, `-`, `*`, `/`, `===`, `!==`, `<=`, `>=`, `>`, `<`.
 - body `{ ... }`
-  - `const name = expression`
-  - `return exp`
+  ```js
+  const name = expression
+  ...
+  return exp
+  ```
