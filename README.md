@@ -31,7 +31,7 @@ Pure functional subset of JavaScripts/TypeScript.
 ### Expression
 
 - data
-  - string `` `string` `` and string interpolation.
+  - string `` `string` ``.
   - number `45.6`
   - object `{ a: 56 }`
   - null `null`
@@ -39,7 +39,7 @@ Pure functional subset of JavaScripts/TypeScript.
   - boolean `true` and `false`
   - array `[ "something" ]`
   - function `a => expression` | `a => { body }`. Yes, only one argument.
-- expressions: `?:`, `+`, `-`, `*`, `/`, `===`, `!==`, `<=`, `>=`, `>`, `<`.
+- expressions: `?:`, `+`, `-`, `*`, `/`, `===`, `!==`, `<=`, `>=`, `>`, `<`, `&&`, `||`, `|`, `&`, string interpolation.
 - body `{ ... }`
   ```js
   const name = expression
