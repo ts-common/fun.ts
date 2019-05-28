@@ -39,7 +39,10 @@ Pure functional subset of JavaScripts/TypeScript.
   - boolean `true` and `false`
   - array `[ "something" ]`
   - function `a => expression` | `a => { body }`. Yes, only one argument.
-- expressions: 
+- expressions:
+  - `exp.property`,
+  - `exp[name]`,
+  - `(exp)`,
   - `?:`, 
   - arithmetic `+`, `-`, `*`, `/`, `%`, `**`
   - compare `===`, `!==`, `<=`, `>=`, `>`, `<`
