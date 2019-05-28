@@ -12,3 +12,37 @@ Pure functional subset of JavaScripts/TypeScript.
   - write/read `.d.ts` files.
   - the subset should be valid JavaScript or TypeSctipt. So no need for additional transpilers, we only need a validator.
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
+
+## Minimal Syntax
+
+### Definition
+
+- `const`
+
+   ```js
+   const name = expression
+   ```
+- `export const`
+  ```js
+  export const name = expression
+  ```
+
+### Expression
+
+- data
+  - string `"string"`
+  - number `45.6`
+  - object `{ a: 56 }`
+  - null `null`
+  - undefined `undefined`
+  - boolean `true` and `false`
+  - array `[ "something" ]`
+  - function `a => expression` | `a => { body }`
+- expressions
+  - `?:`
+  - `+`
+  - `-`
+  - ...
+- body `{ ... }`
+  - definition
+  - `return exp`
