@@ -46,3 +46,5 @@ Pure functional subset of JavaScripts/TypeScript.
 - body `{ ... }`
   - definition
   - `return exp`
+  - `if (exp) { } else if (exp) { } else { }`
+  - `switch (exp) { ... }`
