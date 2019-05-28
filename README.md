@@ -1,4 +1,5 @@
 # fun.ts
+
 Pure functional subset of JavaScripts/TypeScript.
 
 ## Wish List
@@ -9,3 +10,5 @@ Pure functional subset of JavaScripts/TypeScript.
 - Type inference.
 - Compatibility with JavaScript and TypeScript.
   - write/read `.d.ts` files.
+  - the subset should be valid JavaScript or TypeSctipt. So no need for additional transpilers, we only need a validator.
+- The language validator should be written on JavaScript/TypeScript so it can run in a browser.
