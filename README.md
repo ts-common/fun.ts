@@ -31,7 +31,7 @@ Pure functional subset of JavaScripts/TypeScript.
 ### Expression
 
 - data
-  - string `"string"`
+  - string `` `string` `` and string interpolation.
   - number `45.6`
   - object `{ a: 56 }`
   - null `null`
