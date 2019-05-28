@@ -56,7 +56,11 @@ Pure functional subset of JavaScripts/TypeScript.
   ...
   return exp
   ```
-  
+
+### `.d.ts` file.
+
+Only definitions and types. Separate declarations of type definitions and specifications.
+
 ## Next Stage
 
 - nominal types, `instanceof` etc.
