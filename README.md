@@ -53,3 +53,8 @@ Pure functional subset of JavaScripts/TypeScript.
   ...
   return exp
   ```
+  
+## Next Stage
+
+- nominal types, `instanceof` etc.
+- generators, async/await.
