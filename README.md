@@ -65,7 +65,7 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 - nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
   **Note**: `this` should be always be binded explicitly. For example, this code should give an error:
-  ```
+  ```js
   class A {
     x() { return this.y(); }
     y() { retunr 0; }
