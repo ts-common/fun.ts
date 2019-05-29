@@ -63,5 +63,5 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 ## Next Stage
 
-- nominal types, `instanceof`, `class` etc.
+- nominal types, `instanceof`, `class` etc. Carefull with `this` binding.
 - generators, async/await.
