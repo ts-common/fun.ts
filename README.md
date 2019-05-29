@@ -71,7 +71,7 @@ const m = x.constructor
 
 Correct code:
 
-```
+```js
 const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor : undefined
 ```
 
