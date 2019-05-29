@@ -63,5 +63,15 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 ## Next Stage
 
-- nominal types, `instanceof`, `class` etc. Carefull with `this` binding.
+- nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
+  **Note**: `this` should be always be binded explicitly. For example, this code should give an error:
+  ```
+  class A {
+    x() { return this.y(); }
+    y() { retunr 0; }
+  }
+  
+  const a = new A();
+  const f = a.x; // error is here, because a.x can't be used without binding `this`.
+  ```
 - generators, async/await.
