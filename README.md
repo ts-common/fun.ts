@@ -63,7 +63,17 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 ## Notes
 
-Use `hasOwnProperty()` to check if we can read such properties as `constructor`.
+Use `hasOwnProperty()` to check if we can read such properties as `constructor`. Incorrect code:
+
+```js
+const m = x.constructor
+```
+
+Correct code:
+
+```
+const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor : undefined
+```
 
 ## Next Stage
 
