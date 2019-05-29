@@ -61,6 +61,10 @@ Pure functional subset of JavaScripts/TypeScript.
 
 Only definitions and types. Separate declarations of type definitions and specifications.
 
+## Notes
+
+Use `hasOwnProperty()` to check if we can read such properties as `constructor`.
+
 ## Next Stage
 
 - nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
