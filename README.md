@@ -88,4 +88,13 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
   const a = new A();
   const f = a.x; // error is here, because a.x can't be used without binding `this`.
   ```
+  As an option, we can prohibit non-lambda functions
+  ```js
+  class A {
+    x = () => this.y()
+    y = () => 0
+  }
+  const a = new A();
+  const f = a.x; // ok
+  ```
 - generators, async/await.
