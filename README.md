@@ -82,7 +82,7 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
   ```js
   class A {
     x() { return this.y(); }
-    y() { retunr 0; }
+    y() { return 0; }
   }
   
   const a = new A();
