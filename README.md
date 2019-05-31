@@ -62,7 +62,7 @@ Pure functional subset of JavaScripts/TypeScript.
 Typing requires a languages extension. Several safe options are
 - embed typing in comments.
 - embed typing in a separate file.
-- embed typing is based on special run-time definitions. For example `const MyType = { ... }`. 
+- typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
 
 Possible typing languages are
 - TypeScrit.
