@@ -57,6 +57,13 @@ Pure functional subset of JavaScripts/TypeScript.
   return exp
   ```
 
+### Typing
+
+Typing requires a languages extension. Several safe options are
+- embed typing in comments.
+- embed typing in a separate file.
+- embed typing is based on special run-time definitions. For example `const MyType = { ... }`. 
+
 ### `.d.ts` file.
 
 Only definitions and types. Separate declarations of type definitions and specifications.
