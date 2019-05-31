@@ -89,6 +89,7 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 
 ## Next Stage
 
+- integers, `| 0`.
 - nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
   **Note**: `this` should be always be binded explicitly. For example, this code should give an error:
   ```js
