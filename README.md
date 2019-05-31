@@ -64,7 +64,7 @@ Typing requires a languages extension. Several safe options are
 - embed typing in a separate file.
 - embed typing is based on special run-time definitions. For example `const MyType = { ... }`. 
 
-Possible typing language are
+Possible typing languages are
 - TypeScrit.
 - JS docs.
 - Some kind of Haskell type notations?
