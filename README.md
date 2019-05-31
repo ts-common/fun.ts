@@ -5,12 +5,12 @@ Pure functional subset of JavaScripts/TypeScript.
 ## Wish List
 
 - All data is immutable.
-- Pure functions without side-effects.
+- Pure functions, without side-effects.
 - Strong structural typing.
 - Type inference.
 - Compatibility with JavaScript and TypeScript.
   - write/read `.d.ts` files.
-  - the subset should be valid JavaScript or TypeSctipt. So no need for additional transpilers, we only need a validator.
+  - the subset should be valid JavaScript or TypeScript. So no need for additional transpilers, we only need a validator.
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
 - no implicit type conversions. For example `?:` should only accept `bool` type.
 
