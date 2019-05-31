@@ -14,19 +14,41 @@ Pure functional subset of JavaScripts/TypeScript.
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
 - no implicit type conversions. For example `?:` should only accept `bool` type.
 
-## Minimal Syntax
+## Typing
+
+Typing requires a languages extension. Several safe options are
+- embed typing in comments.
+- embed typing in a separate file.
+- typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
+
+Possible typing languages are
+- TypeScrit.
+- JS docs.
+- Some kind of Haskell type notations?
+
+## Notes
+
+Use `hasOwnProperty()` to check if we can read such properties as `constructor`. Incorrect code:
+
+```js
+const m = x.constructor
+```
+
+Correct code:
+
+```js
+const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor : undefined
+```
+
+## Stage One
+
+Use semicolon as separator.
 
 ### Definition
 
-- `const`
-
-   ```js
-   const name = expression
-   ```
-- `export const`
-  ```js
-  export const name = expression
-  ```
+```js
+const name = expression
+```
 
 ### Expression
 
@@ -50,44 +72,33 @@ Pure functional subset of JavaScripts/TypeScript.
   - bitwise `|`, `&`, `^`, `~`, `<<`, `>>`, `>>>`
   - string interpolation,
   - `typeof`
-- body `{ ... }`
-  ```js
+
+### Body
+
+```js
+{
   const name = expression
   ...
   return exp
+}
+```
+
+## Stage Two
+
+No semicolons.
+
+### Definition
+
+- `export const`
+  ```js
+  export const name = expression
   ```
 
-### Typing
-
-Typing requires a languages extension. Several safe options are
-- embed typing in comments.
-- embed typing in a separate file.
-- typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
-
-Possible typing languages are
-- TypeScrit.
-- JS docs.
-- Some kind of Haskell type notations?
-
-### `.d.ts` file.
+### `.d.ts` file?
 
 Only definitions and types. Separate declarations of type definitions and specifications.
 
-## Notes
-
-Use `hasOwnProperty()` to check if we can read such properties as `constructor`. Incorrect code:
-
-```js
-const m = x.constructor
-```
-
-Correct code:
-
-```js
-const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor : undefined
-```
-
-## Next Stage
+## Stage Three
 
 - integers, `| 0`.
 - nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
