@@ -85,7 +85,9 @@ const name = expression
 
 ## Stage Two
 
-No semicolons.
+- spread operators.
+- destruction. `const { ["some"]: deleteted, ...rest } = something`
+- No semicolons.
 
 ### Definition
 
