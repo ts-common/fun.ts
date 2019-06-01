@@ -13,6 +13,14 @@ Pure functional subset of JavaScripts/TypeScript.
   - the subset should be valid JavaScript or TypeScript. So no need for additional transpilers, we only need a validator.
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
 - no implicit type conversions. For example `?:` should only accept `bool` type.
+- Type system should allow to describe monads. Example on pseudo-TypeScript
+  ```ts
+  type MonadStrategy = {
+      type Monad<T>; // this line can't be compiled in TypeScript.
+      readonly just: <T>(v: T) => Monad<T>
+      readonly join: <T>(m: Monad<Monad<T>>) => Monad<T>
+  }
+  ```
 
 ## Typing
 
