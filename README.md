@@ -20,6 +20,13 @@ Pure functional subset of JavaScripts/TypeScript.
       readonly just: <T>(v: T) => Monad<T>
       readonly join: <T>(m: Monad<Monad<T>>) => Monad<T>
   }
+  
+  // Or
+  type MonadStrategy = {
+      type Monad { type T }; // this line can't be compiled in TypeScript.
+      readonly just: <T>(v: T) => Monad { T }
+      readonly join: <T>(m: Monad { T: Monad { T } }) => Monad { T }
+  }
   ```
 
 ## Typing
