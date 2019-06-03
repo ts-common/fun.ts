@@ -28,6 +28,7 @@ Pure functional subset of JavaScripts/TypeScript.
       readonly join: <T>(m: Monad { T: Monad { T } }) => Monad { T }
   }
   ```
+- Type system should be able to reflect JSON-Schema.
 
 ## Typing
 
