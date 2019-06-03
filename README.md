@@ -38,10 +38,10 @@ Typing requires a languages extension. Several safe options are
 - typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
 
 Possible typing languages are
-- TypeScrit.
-- JS docs.
+- TypeScrit,
+- JS docs,
+- JSON-Schema,
 - Some kind of Haskell type notations?
-- JSON-Schema.
 
 ## Notes
 
