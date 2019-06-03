@@ -140,4 +140,4 @@ Only definitions and types. Separate declarations of type definitions and specif
   const a = new A();
   const f = a.x; // ok
   ```
-- generators, async/await.
+- generators, async/await?
