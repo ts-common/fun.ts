@@ -41,6 +41,7 @@ Possible typing languages are
 - TypeScrit.
 - JS docs.
 - Some kind of Haskell type notations?
+- JSON-Schema.
 
 ## Notes
 
