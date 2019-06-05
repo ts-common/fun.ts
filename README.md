@@ -6,7 +6,7 @@ There are a lot of pure functional languages that can be compiled to JavaScript.
 
 The project is not another functional language that can be compiled into JavaScript. The project tries to define a subset of JavaScript that can be formally verified.
 
-The subset can be used as safe script or as a target platform for other programming languages. 
+The subset can be used as a safe script or as a target platform for other programming languages. 
 
 ## Wish List
 
