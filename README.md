@@ -3,6 +3,7 @@
 Pure functional subset of JavaScripts/TypeScript.
 
 There are a lot of pure functional languages that can be compiled to JavaScript. Usually, the biggest problem with these libraries is inteoperability. For example, if you have a big project written on JavaScript, it's very challenging to rewrite parts of this project step-by-step using another language.
+- [ELM](https://elm-lang.org/).
 
 ## Wish List
 
