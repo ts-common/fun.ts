@@ -125,6 +125,14 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 ## Stage Three
 
+- builders. Write-only objects with limitted scope. For example
+  ```ts
+  {
+    const x = { p: 3 }
+    x.p = somefunc()
+    return x
+  }
+  ```
 - integers, `| 0`.
 - nominal types, `instanceof`, `class` etc. This is required for some existing types, such as `Date`, `Set` etc.
   **Note**: `this` should be always be binded explicitly. For example, this code should give an error:
