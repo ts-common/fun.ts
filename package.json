@@ -1,0 +1,76 @@
+{
+  "name": "@ts-common/fun.ts",
+  "version": "0.0.0",
+  "description": "Pure functional subset of JavaScripts/TypeScript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.d.ts",
+    "dist/index.d.ts.map",
+    "dist/index.js.map",
+    "dist/index.js",
+    "src/index.ts"
+  ],
+  "scripts": {
+    "tsc": "tsc",
+    "test": "tsc && jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/dist/test/*test.js"
+    ],
+    "reporters": [
+      "jest-junit",
+      "default"
+    ],
+    "collectCoverage": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "coveragePathIgnorePatterns": [
+      "/dist/test/"
+    ],
+    "coverageReporters": [
+      "cobertura",
+      "text",
+      "html"
+    ]
+  },
+  "jest-junit": {
+    "outputDirectory": ".",
+    "outputName": "test-results.xml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ts-common/fun.ts.git"
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "functional"
+  ],
+  "author": "Sergey Shandar",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ts-common/fun.ts/issues"
+  },
+  "homepage": "https://github.com/ts-common/fun.ts#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "jest": "^24.8.0",
+    "jest-junit": "^6.4.0",
+    "tslint": "^5.17.0",
+    "tslint-immutable": "^6.0.0",
+    "typescript": "^3.5.1"
+  },
+  "dependencies": {
+    "@ts-common/add-position": "^0.1.0",
+    "@ts-common/iterator": "^0.3.5"
+  }
+}
