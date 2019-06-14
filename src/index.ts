@@ -15,6 +15,8 @@ const lowerCaseLetterSet = interval('a', 'b')
 
 const digitSet = interval('0', '9')
 
+const eSet = union(one('e'), one('E'))
+
 const letterSet = union(upperCaseLetterSet, lowerCaseLetterSet)
 
 const firstIdLetterSet = union(one('$'), one('_'), letterSet)
@@ -27,8 +29,8 @@ type Terminal = {
     readonly kind: "Terminal"
 }
 
-type UnknownCharacter = {
-    readonly kind: "UnknownCharacter"
+type UnknownCharacterError = {
+    readonly kind: "UnknownCharacterError"
     readonly c: string
 }
 
@@ -50,17 +52,12 @@ type Id = {
     readonly value: string
 }
 
-type Int = {
-    readonly kind: "Int"
+type Number = {
+    readonly kind: "Number"
     readonly value: number
 }
 
-type Float = {
-    readonly kind: "Float"
-    readonly value: number
-}
-
-type Token = Terminal | UnknownCharacter | Id | Int | Float | Symbol
+type Token = Terminal | UnknownCharacterError | Id | Number | Symbol
 
 type TokenAndPosition = {
     readonly token: Token
@@ -81,10 +78,10 @@ const whiteSpaceState: State = ({c, position}) =>
     : firstIdLetterSet(c)
         ? [createIdState(position)(c), []]
     : digitSet(c)
-        ? [createIntState(position)(c), []]
+        ? [createNumberState(position)(c), []]
     : symbolSet(c)
         ? [whiteSpaceState, [{ token: { kind: "Symbol", c }, position }]]
-        : [whiteSpaceState, [{ token: { kind: "UnknownCharacter", c }, position }]]
+        : [whiteSpaceState, [{ token: { kind: "UnknownCharacterError", c }, position }]]
 
 const continueWhiteSpace = (tp: TokenAndPosition, cp: CharAndPosition): StateResult => {
     const [state, result] = whiteSpaceState(cp)
@@ -106,15 +103,77 @@ const ZeroCharCode = '0'.charCodeAt(0)
 
 const charToInt = (c: string) => c.charCodeAt(0) - ZeroCharCode
 
-const createIntState = (position: Position) => {
-    const nextState = (value: number): State => cp => {
+const createNumberState = (position: Position) => {
+
+    const beforeDot = (value: number): State => cp => {
         const c = cp.c
         if (c !== null) {
             if (digitSet(c)) {
-                return [nextState(value * 10 + charToInt(c)), []]
+                return [beforeDot(value * 10 + charToInt(c)), []]
+            }
+            if (c === ".") {
+                return [afterDot({ value, multiplier: 0.1 }), []]
+            }
+            if (eSet(c)) {
+                return [afterE(value), []]
             }
         }
-        return continueWhiteSpace({ token: { kind: "Int", value }, position }, cp)
+        return continueWhiteSpace({ token: { kind: "Number", value }, position }, cp)
     }
-    return (c: string) => nextState(charToInt(c))
+
+    const afterDot = ({ value, multiplier }: NumberAfterDot) => (cp: CharAndPosition): StateResult => {
+        const { c } = cp
+        if (c !== null) {
+            if (digitSet(c)) {
+                return [afterDot({ value: value + charToInt(c) * multiplier, multiplier: multiplier * 0.1 }), []]
+            }
+            if (eSet(c)) {
+                return [afterE(value), []]
+            }
+        }
+        return continueWhiteSpace({ token: { kind: "Number", value }, position }, cp)
+    }
+
+    const afterE = (value: number) => (cp: CharAndPosition): StateResult => {
+        const { c } = cp
+        if (c !== null) {
+            if (c === '-') {
+                return [afterESign({ value, positive: false }), []]
+            }
+            const plus = afterESign({ value, positive: true })
+            if (c === '+') {
+                return [plus, []]
+            }
+            if (digitSet(c)) {
+                return plus(cp)
+            }
+        }
+        return continueWhiteSpace({ token: { kind: "Number", value }, position }, cp)
+    }
+
+    // {value}E+23 = {value} * 10 ** 23 => 10 ** (20 + 3) => {value} * ((10 ** 2) ** 10) * (10 ** 3)
+    const afterESign = ({ value, positive }: NumberAfterESign) => {
+        const state = (multiplier: number) => (cp: CharAndPosition): StateResult => {
+            const { c } = cp
+            if (c !== null) {
+                if (digitSet(c)) {
+                    return [state(multiplier ** 10 * multiplier * 10 ** charToInt(c)), []]
+                }
+            }
+            return continueWhiteSpace({ token: { kind: "Number", value: value * (positive ? multiplier : 1 / multiplier) }, position }, cp)
+        }
+        return state(1)
+    }
+
+    return (c: string) => beforeDot(charToInt(c))
+}
+
+type NumberAfterDot = {
+    readonly value: number
+    readonly multiplier: number
+}
+
+type NumberAfterESign = {
+    readonly value: number
+    readonly positive: boolean
 }
