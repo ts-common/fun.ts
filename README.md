@@ -51,21 +51,24 @@ Possible typing languages are
 
 ### Proposed Typing
 
-JavaScript
-
-```js
-const myFunc
-    // : (_: number) => string
-    = v => v.toString()
-```
-
-TypeScript
-
-```ts
-const myFunc
-    : (_: number) => string
-    = v => v.toString()
-```
+- JavaScript
+  
+  ```js
+  const myFunc
+      //: (_: number) => string
+      = v => v.toString()
+  ```
+  
+  ```js
+  const myFunc /*: (_: number) => string */ = v => v.toString()
+  ```
+- TypeScript
+  
+  ```ts
+  const myFunc
+      : (_: number) => string
+      = v => v.toString()
+  ```
 
 ## Notes
 
