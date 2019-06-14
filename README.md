@@ -63,7 +63,7 @@ Possible typing languages are
   const myFunc /*: (_: number) => string */ = v => v.toString()
   ```
   
-  Simplified types
+  Simplified types (incompatable with TypeScript).
   ```js
   const myFunc
       //: number => string
