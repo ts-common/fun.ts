@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "tsc": "tsc",
-    "test": "tsc && jest"
+    "test": "tsc && tslint -p tsconfig.json && jest"
   },
   "jest": {
     "testEnvironment": "node",
