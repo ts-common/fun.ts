@@ -23,6 +23,8 @@
         "array-type": [true, "array"],
         "completed-docs": false,
         "no-if-statement": false,
+        "no-magic-numbers": false,
+        "no-bitwise": false
     },
     "rulesDirectory": []
 }

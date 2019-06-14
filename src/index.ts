@@ -1,19 +1,19 @@
-import * as _ from '@ts-common/iterator'
+import * as it from '@ts-common/iterator'
 import { CharAndPosition, Position } from '@ts-common/add-position'
 
-// string => boolean
 type CharSet = (_: string) => boolean
 
-// string => string => CharSet
-const interval: (_: string) => (_: string) => CharSet =
-    min => max => c => min <= c && c <= max
+const interval
+    : (_: string) => (_: string) => CharSet
+    = min => max => c => min <= c && c <= max
 
-// string => CharSet
-const one: (_: string) => CharSet =
-    v => c => v === c
+const one
+    : (_: string) => CharSet
+    = v => c => v === c
 
-// ...CharSet[] => CharSet
-const union = (...sets: readonly CharSet[]): CharSet => c => _.some(sets, set => set(c))
+const union
+    : (..._: readonly CharSet[]) => CharSet
+    = (...sets) => c => it.some(sets, set => set(c))
 
 const upperCaseLetterSet = interval('A')('B')
 
@@ -51,9 +51,9 @@ type SymbolToken = {
     readonly c: SymbolType
 }
 
-// string => SymbolType | undefined
-const symbolSet: (_: string) => SymbolType | undefined =
-    c => symbolArray.find(v => v === c)
+const symbolSet
+    : (_: string) => SymbolType | undefined
+    = c => symbolArray.find(v => v === c)
 
 type Id = {
     readonly kind: 'Id'
@@ -65,29 +65,29 @@ type FloatNumber = {
     readonly value: number
 }
 
-type String = {
-    readonly kind: 'String'
+type StringToken = {
+    readonly kind: 'StringToken'
     readonly value: string
 }
 
-type Token = Terminal | UnknownCharacterError | Id | FloatNumber | SymbolToken | String
+type Token = Terminal | UnknownCharacterError | Id | FloatNumber | SymbolToken | StringToken
 
 type TokenAndPosition = {
     readonly token: Token
     readonly position: Position
 }
 
-type StateResult = readonly [State, _.Iterable<TokenAndPosition>]
+type StateResult = readonly [State, it.Iterable<TokenAndPosition>]
 
 type State = (_: CharAndPosition) => StateResult
 
-// Position => StateResult
-const createTerminal: (_: Position) => StateResult =
-    position => [whiteSpaceState, [{ token: { kind: 'Terminal' }, position }]]
+const createTerminal
+    : (_: Position) => StateResult
+    = position => [whiteSpaceState, [{ token: { kind: 'Terminal' }, position }]]
 
-// State
-const whiteSpaceState: State =
-    cp => {
+const whiteSpaceState
+    : State
+    = cp => {
         const { c, position } = cp
         if (c === null) {
             return createTerminal(position)
@@ -111,18 +111,18 @@ const whiteSpaceState: State =
         return [whiteSpaceState, [{ token: { kind: 'UnknownCharacterError', c }, position }]]
     }
 
-// TokenAndPosition => State
-const continueWhiteSpace: (_: TokenAndPosition) => State =
-    tp => cp => {
+const continueWhiteSpace
+    : (_: TokenAndPosition) => State
+    = tp => cp => {
         const [state, result] = whiteSpaceState(cp)
-        return [state, _.concat([tp], result)]
+        return [state, it.concat([tp], result)]
     }
 
-// Position => string => State
-const createIdState: (_: Position) => (_: string) => State =
-    position => {
-        // string => State
-        const nextState: (value: string) => State =
+const createIdState
+    : (_: Position) => (_: string) => State
+    = position => {
+        const nextState:
+            (value: string) => State =
             value => cp => {
                 const { c } = cp
                 return c !== null && restIdLetterSet(c)
@@ -134,60 +134,60 @@ const createIdState: (_: Position) => (_: string) => State =
 
 const zeroCharCode = '0'.charCodeAt(0)
 
-// string => number
-const charToInt: (_: string) => number =
-    c => c.charCodeAt(0) - zeroCharCode
+const charToInt
+    : (_: string) => number
+    = c => c.charCodeAt(0) - zeroCharCode
 
-// Position => string => State
-const createNumberState: (_: Position) => (_: string) => State =
-    position => {
+const createNumberState
+    : (_: Position) => (_: string) => State
+    = position => {
 
-        // number => State
-        const end: (_: number) => State =
-            value => continueWhiteSpace({ token: { kind: 'FloatNumber', value }, position })
+        const end
+            : (_: number) => State
+            = value => continueWhiteSpace({ token: { kind: 'FloatNumber', value }, position })
 
-        // number => State
-        const begin: (_: number) => State =
-            value => cp => {
+        const begin
+            : (_: number) => State
+            = value => cp => {
                 const { c } = cp
                 if (c !== null) {
                     if (digitSet(c)) {
                         return [begin(value * 10 + charToInt(c)), []]
                     }
                     if (c === '.') {
-                        return [afterDot(value)(0.1), []]
+                        return [dot(value)(0.1), []]
                     }
                     if (eSet(c)) {
-                        return [afterE(value), []]
+                        return [exp(value), []]
                     }
                 }
                 return end(value)(cp)
             }
 
-        // number => number => State
-        const afterDot: (_: number) => (_: number) => State =
-            value => multiplier => cp => {
+        const dot
+            : (_: number) => (_: number) => State
+            = value => multiplier => cp => {
                 const { c } = cp
                 if (c !== null) {
                     if (digitSet(c)) {
-                        return [afterDot(value + charToInt(c) * multiplier)(multiplier * 0.1), []]
+                        return [dot(value + charToInt(c) * multiplier)(multiplier * 0.1), []]
                     }
                     if (eSet(c)) {
-                        return [afterE(value), []]
+                        return [exp(value), []]
                     }
                 }
                 return end(value)(cp)
             }
 
-        // number => State
-        const afterE: (_: number) => State =
-            value => cp => {
+        const exp
+            : (_: number) => State
+            = value => cp => {
                 const { c } = cp
                 if (c !== null) {
                     if (c === '-') {
-                        return [afterESign(value)(false), []]
+                        return [expSign(value)(false), []]
                     }
-                    const plus = afterESign(value)(true)
+                    const plus = expSign(value)(true)
                     if (c === '+') {
                         return [plus, []]
                     }
@@ -198,36 +198,115 @@ const createNumberState: (_: Position) => (_: string) => State =
                 return end(value)(cp)
             }
 
-        // number => boolean => State
-        const afterESign: (_: number) => (_: boolean) => State =
-            value => positive => {
-                // number => State
-                const multiplierState: (_: number) => State =
-                    multiplier => cp => {
+        const expSign
+            : (_: number) => (_: boolean) => State
+            = value => positive => {
+                const state
+                    : (_: number) => State
+                    = multiplier => cp => {
                         const { c } = cp
-                        if (c !== null && digitSet(c)) {
-                            // eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
-                            return [multiplierState(multiplier ** 10 * 10 ** charToInt(c)), []]
-                        }
-                        return end(value * (positive ? multiplier : 1 / multiplier))(cp)
+                        return c !== null && digitSet(c)
+                            // Eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
+                            ? [state(multiplier ** 10 * 10 ** charToInt(c)), []]
+                            : end(value * (positive ? multiplier : 1 / multiplier))(cp)
                     }
-                return multiplierState(1)
+                return state(1)
             }
 
         return c => begin(charToInt(c))
     }
 
-// Position => State
-const createStringState: (_: Position) => State =
-    position => {
-        // string => State
-        const state: (_: string) => State =
-            value => cp => {
-                const { c } = cp
-                if (c === null || c === '\n' || c === '"') {
-                    return continueWhiteSpace({ token: { kind: 'String', value }, position })(cp)
-                }
-                return [state(value + c), []]
+const escapeMap
+    : { readonly [i in string]?: string }
+    = {
+        '"': '"',
+        '\\': '\\',
+        '/': '/',
+        'b': '\b',
+        't': '\t',
+        'f': '\f',
+        'r': '\r',
+        'n': '\n',
+    }
+
+const hexUpperAOffset = 'A'.charCodeAt(0) - 10
+
+const hexLowerAOffset = 'a'.charCodeAt(0) - 10
+
+const hexUppercaseSet = interval('A')('F')
+
+const hexLowercaseSet = interval('a')('f')
+
+const hex
+    : (_: string) => number | undefined
+    = c => digitSet(c) ? charToInt(c)
+        : hexUppercaseSet(c) ? c.charCodeAt(0) - hexUpperAOffset
+        : hexLowercaseSet(c) ? c.charCodeAt(0) - hexLowerAOffset
+        : undefined
+
+const createStringState
+    : (_: Position) => State
+    = position => {
+        const state
+            : (_: string) => State
+            = value => {
+                const end
+                    : State
+                    = continueWhiteSpace({ token: { kind: 'StringToken', value }, position })
+                const main
+                    : State
+                    = cp => {
+                        const { c } = cp
+                        if (c === '"') {
+                            return end(cp)
+                        }
+                        if (c === null || c === '\n') {
+                            // Report an error
+                            return end(cp)
+                        }
+                        if (c === '\\') {
+                            return [escape, []]
+                        }
+                        return [state(value + c), []]
+                    }
+                const escape
+                    : State
+                    = cp => {
+                        const { c } = cp
+                        if (c === 'u') {
+                            return [unicodeEscape(0)(0), []]
+                        }
+                        if (c === null || c === '\n') {
+                            // Report an error
+                            return end(cp)
+                        }
+                        const result = escapeMap[c]
+                        if (result !== undefined) {
+                            return [state(value + result), []]
+                        }
+                        // Report an error
+                        return [state(value + c), []]
+                    }
+                const unicodeEscape
+                    : (_: number) => (_: number) => State
+                    = code => i => cp => {
+                        const { c } = cp
+                        if (c === null || c === '\n') {
+                            // Report error
+                            return end(cp)
+                        }
+                        const h = hex(c)
+                        if (h !== undefined) {
+                            const newCode = (code << 4) + h
+                            const stateResult = i < 3
+                                ? unicodeEscape(newCode)(i + 1)
+                                : state(value + String.fromCharCode(newCode))
+                            return [stateResult, []]
+                        }
+                        // Report error
+                        return end(cp)
+                    }
+                return main
             }
         return state('')
     }
