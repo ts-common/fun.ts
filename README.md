@@ -51,7 +51,7 @@ Possible typing languages are
 
 ### Proposed Typing
 
-- JavaScript
+- JavaScript. Start with `//:` or `/*:`
   
   ```js
   const myFunc
