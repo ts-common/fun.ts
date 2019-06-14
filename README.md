@@ -8,7 +8,7 @@ The project is not another functional language that can be compiled into JavaScr
 
 The subset can be used as a safe script or as a target platform for other programming languages. 
 
-## Target
+## Potential Targets
 
 - Markdown safe script that can be run in a browser,
 - distributed systems, like [ALIQ](https://github.com/aliq-lang/),
