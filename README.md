@@ -62,6 +62,16 @@ Possible typing languages are
   ```js
   const myFunc /*: (_: number) => string */ = v => v.toString()
   ```
+  
+  ```js
+  //type MyType = ...
+  ```
+  
+  ```ts
+  /*type MyType = {
+  
+  }*/
+  ```
 - TypeScript
   
   ```ts
