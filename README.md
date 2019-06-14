@@ -55,6 +55,8 @@ Use `hasOwnProperty()` to check if we can read such properties as `constructor`.
 
 ```js
 const m = x.constructor
+// or
+const { constructor } = x
 ```
 
 Correct code:
