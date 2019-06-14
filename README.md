@@ -49,6 +49,24 @@ Possible typing languages are
 - JSON-Schema,
 - Some kind of Haskell type notations?
 
+### Proposed Typing
+
+JavaScript
+
+```js
+const myFunc
+    // : (_: number) => string
+    = v => v.toString()
+```
+
+TypeScript
+
+```ts
+const myFunc
+    : (_: number) => string
+    = v => v.toString()
+```
+
 ## Notes
 
 Use `hasOwnProperty()` to check if we can read such properties as `constructor`. Incorrect code:
