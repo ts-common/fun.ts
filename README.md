@@ -8,6 +8,13 @@ The project is not another functional language that can be compiled into JavaScr
 
 The subset can be used as a safe script or as a target platform for other programming languages. 
 
+## Potential Targets
+
+- Markdown safe script that can be run in a browser,
+- distributed systems, like [ALIQ](https://github.com/aliq-lang/),
+- as a target platform for other functional languages.
+- the subset can be recognized by browser and compiled into more optimal code (similar to asm.js).
+
 ## Wish List
 
 - All data is immutable.
