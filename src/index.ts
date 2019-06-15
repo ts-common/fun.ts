@@ -17,7 +17,7 @@ const union
 
 const upperCaseLetterSet = interval('A')('B')
 
-const lowerCaseLetterSet = interval('a')('b')
+const lowerCaseLetterSet = interval('a')('z')
 
 const digitSet = interval('0')('9')
 
@@ -250,7 +250,7 @@ const createStringState
         const state
             : (_: string) => State
             = value => {
-                const end
+                const error
                     : State
                     = continueWhiteSpace({ token: { kind: 'StringToken', value }, position })
                 const main
@@ -258,11 +258,11 @@ const createStringState
                     = cp => {
                         const { c } = cp
                         if (c === '"') {
-                            return end(cp)
+                            return [whiteSpaceState, [{ token: { kind: 'StringToken', value }, position }]]
                         }
                         if (c === null || c === '\n') {
                             // Report an error
-                            return end(cp)
+                            return error(cp)
                         }
                         if (c === '\\') {
                             return [escape, []]
@@ -278,7 +278,7 @@ const createStringState
                         }
                         if (c === null || c === '\n') {
                             // Report an error
-                            return end(cp)
+                            return error(cp)
                         }
                         const result = escapeMap[c]
                         if (result !== undefined) {
@@ -293,7 +293,7 @@ const createStringState
                         const { c } = cp
                         if (c === null || c === '\n') {
                             // Report error
-                            return end(cp)
+                            return error(cp)
                         }
                         const h = hex(c)
                         if (h !== undefined) {
@@ -304,7 +304,7 @@ const createStringState
                             return [stateResult, []]
                         }
                         // Report error
-                        return end(cp)
+                        return error(cp)
                     }
                 return main
             }

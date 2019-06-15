@@ -49,13 +49,126 @@ describe('tokenizer', () => {
                         line: 2
                     },
                     token: {
-                        kind: 'Id'
+                        kind: 'Id',
+                        value: 'id15'
                     }
                 },
                 {
                     position: {
-                        column: 6,
+                        column: 7,
                         line: 2
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number', () => {
+        const x = addPosition(' 15 ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15
+                    }
+                },
+                {
+                    position: {
+                        column: 5,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with dot', () => {
+        const x = addPosition(' 15.67 ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15.67
+                    }
+                },
+                {
+                    position: {
+                        column: 8,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with e', () => {
+        const x = addPosition(' 15.67e-3 ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 0.01567
+                    }
+                },
+                {
+                    position: {
+                        column: 11,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('string', () => {
+        const x = addPosition(' "abc" ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc'
+                    }
+                },
+                {
+                    position: {
+                        column: 8,
+                        line: 1
                     },
                     token: {
                         kind: 'Terminal'
