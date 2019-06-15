@@ -85,7 +85,7 @@ const createTerminal
     : (_: Position) => StateResult
     = position => [whiteSpaceState, [{ token: { kind: 'Terminal' }, position }]]
 
-const whiteSpaceState
+export const whiteSpaceState
     : State
     = cp => {
         const { c, position } = cp
