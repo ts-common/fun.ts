@@ -250,15 +250,18 @@ const createStringState
         const state
             : (_: string) => State
             = value => {
+                const tp
+                    : TokenAndPosition
+                    = { token: { kind: 'StringToken', value }, position }
                 const error
                     : State
-                    = continueWhiteSpace({ token: { kind: 'StringToken', value }, position })
+                    = continueWhiteSpace(tp)
                 const main
                     : State
                     = cp => {
                         const { c } = cp
                         if (c === '"') {
-                            return [whiteSpaceState, [{ token: { kind: 'StringToken', value }, position }]]
+                            return [whiteSpaceState, [tp]]
                         }
                         if (c === null || c === '\n') {
                             // Report an error

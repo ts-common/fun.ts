@@ -176,4 +176,60 @@ describe('tokenizer', () => {
                 }
             ])
     })
+    it('stringEscape', () => {
+        const x = addPosition(' "abc\\t\\n" ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\t\n'
+                    }
+                },
+                {
+                    position: {
+                        column: 12,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('stringUnicode', () => {
+        const x = addPosition(' "abc\\u0020x" ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc x'
+                    }
+                },
+                {
+                    position: {
+                        column: 15,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
 })
