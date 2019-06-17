@@ -301,35 +301,31 @@ const createStringState
                         if (c === 'u') {
                             return [unicodeEscape(0)(0), []]
                         }
-                        if (c === null || c === '\n') {
-                            // Report an error
-                            return error(cp)
-                        }
-                        const result = escapeMap[c]
-                        if (result !== undefined) {
-                            return [state(value + result), []]
+                        if (c !== null) {
+                            const result = escapeMap[c]
+                            if (result !== undefined) {
+                                return [state(`${value}${result}`), []]
+                            }
                         }
                         // Report an error
-                        return [state(value + c), []]
+                        return state(`${value}\\`)(cp)
                     }
                 const unicodeEscape
                     : (_: number) => (_: number) => State
                     = code => i => cp => {
                         const { c } = cp
-                        if (c === null || c === '\n') {
-                            // Report an error
-                            return error(cp)
-                        }
-                        const h = hex(c)
-                        if (h !== undefined) {
-                            const newCode = (code << 4) + h
-                            const stateResult = i < 3
-                                ? unicodeEscape(newCode)(i + 1)
-                                : state(value + String.fromCharCode(newCode))
-                            return [stateResult, []]
+                        if (c !== null) {
+                            const h = hex(c)
+                            if (h !== undefined) {
+                                const newCode = (code << 4) + h
+                                const stateResult = i < 3
+                                    ? unicodeEscape(newCode)(i + 1)
+                                    : state(value + String.fromCharCode(newCode))
+                                return [stateResult, []]
+                            }
                         }
                         // Report an error
-                        return error(cp)
+                        return state(`${value}\\u`)(cp)
                     }
                 return main
             }

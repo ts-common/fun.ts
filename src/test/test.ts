@@ -176,6 +176,62 @@ describe('tokenizer', () => {
                 }
             ])
     })
+    it('number with e plus', () => {
+        const x = addPosition('15e+10 ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15e10
+                    }
+                },
+                {
+                    position: {
+                        column: 8,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with e and terminal', () => {
+        const x = addPosition('15e')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15
+                    }
+                },
+                {
+                    position: {
+                        column: 4,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
     it('number with dot and e', () => {
         const x = addPosition(' 15.67e-3 ')
         const r = x
@@ -308,6 +364,118 @@ describe('tokenizer', () => {
                 {
                     position: {
                         column: 15,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('stringUnicode break', () => {
+        const x = addPosition(' "abc\\uA2" ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\\u'
+                    }
+                },
+                {
+                    position: {
+                        column: 12,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('string break', () => {
+        const x = addPosition(' "abc')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc'
+                    }
+                },
+                {
+                    position: {
+                        column: 6,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('string escape break', () => {
+        const x = addPosition(' "abc\\')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\\'
+                    }
+                },
+                {
+                    position: {
+                        column: 7,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('string unknown escape', () => {
+        const x = addPosition(' "abc\\w')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\\w'
+                    }
+                },
+                {
+                    position: {
+                        column: 8,
                         line: 1
                     },
                     token: {
