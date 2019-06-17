@@ -12,7 +12,7 @@ The subset can be used as a safe script or as a target platform for other progra
 
 - Markdown safe script that can be run in a browser,
 - query languges,
-- distributed systems, like [ALIQ](https://github.com/aliq-lang/),
+- distributed systems, like [ALIQ](https://github.com/aliq-lang/), machine learning, AI,
 - as a target platform for other functional languages.
 - the subset can be recognized by browser and compiled into more optimal code (similar to asm.js).
 
