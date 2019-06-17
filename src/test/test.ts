@@ -148,6 +148,62 @@ describe('tokenizer', () => {
                 }
             ])
     })
+    it('number and terminal', () => {
+        const x = addPosition('1234567')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 1234567
+                    }
+                },
+                {
+                    position: {
+                        column: 8,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with dot and terminal', () => {
+        const x = addPosition('1234567.9')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 1234567.9
+                    }
+                },
+                {
+                    position: {
+                        column: 10,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
     it('number with dot', () => {
         const x = addPosition(' 15.67 ')
         const r = x
@@ -224,6 +280,44 @@ describe('tokenizer', () => {
                 {
                     position: {
                         column: 4,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with e and something', () => {
+        const x = addPosition('15eX')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15
+                    }
+                },
+                {
+                    position: {
+                        column: 4,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Id',
+                        value: 'X'
+                    }
+                },
+                {
+                    position: {
+                        column: 5,
                         line: 1
                     },
                     token: {
@@ -372,6 +466,34 @@ describe('tokenizer', () => {
                 }
             ])
     })
+    it('stringUnicode with hex letters', () => {
+        const x = addPosition(' "abc\\u01aBx" ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\u01aBx'
+                    }
+                },
+                {
+                    position: {
+                        column: 15,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
     it('stringUnicode break', () => {
         const x = addPosition(' "abc\\uA2" ')
         const r = x
@@ -392,6 +514,34 @@ describe('tokenizer', () => {
                 {
                     position: {
                         column: 12,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('stringUnicode terminal', () => {
+        const x = addPosition(' "abc\\uA2')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'StringToken',
+                        value: 'abc\\u'
+                    }
+                },
+                {
+                    position: {
+                        column: 10,
                         line: 1
                     },
                     token: {

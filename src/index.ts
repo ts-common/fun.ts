@@ -15,7 +15,7 @@ const union
     : (..._: readonly CharSet[]) => CharSet
     = (...sets) => c => it.some(sets, set => set(c))
 
-const upperCaseLetterSet = interval('A')('B')
+const upperCaseLetterSet = interval('A')('Z')
 
 const lowerCaseLetterSet = interval('a')('z')
 
