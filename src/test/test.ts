@@ -36,6 +36,62 @@ describe('tokenizer', () => {
                 }
             }])
     })
+    it('whiteSpace', () => {
+        const x = addPosition('#')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 1,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'UnknownCharacterError',
+                        c: '#'
+                    }
+                },
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('symbol', () => {
+        const x = addPosition(' {  ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'SymbolToken',
+                        c: '{'
+                    }
+                },
+                {
+                    position: {
+                        column: 5,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
     it(`id`, () => {
         const x = addPosition(' \t\r\n id15 ')
         const r = x
@@ -120,7 +176,7 @@ describe('tokenizer', () => {
                 }
             ])
     })
-    it('number with e', () => {
+    it('number with dot and e', () => {
         const x = addPosition(' 15.67e-3 ')
         const r = x
             .flatScan((s, c) => s(c), index.whiteSpaceState)
@@ -140,6 +196,34 @@ describe('tokenizer', () => {
                 {
                     position: {
                         column: 11,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'Terminal'
+                    }
+                }
+            ])
+    })
+    it('number with e', () => {
+        const x = addPosition(' 15e3 ')
+        const r = x
+            .flatScan((s, c) => s(c), index.whiteSpaceState)
+            .toArray()
+        expect(r)
+            .toEqual([
+                {
+                    position: {
+                        column: 2,
+                        line: 1
+                    },
+                    token: {
+                        kind: 'FloatNumber',
+                        value: 15000
+                    }
+                },
+                {
+                    position: {
+                        column: 7,
                         line: 1
                     },
                     token: {

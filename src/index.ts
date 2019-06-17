@@ -146,14 +146,14 @@ const createNumberState
     : (_: Position) => (_: string) => State
     = position => {
 
-        type NumberState = {
+        type NumberStates = {
             readonly begin: State
             readonly dot: (_: number) => State
             readonly end: State
         }
 
-        const state
-            : (_: number) => NumberState
+        const states
+            : (_: number) => NumberStates
             = value => {
 
                 const end
@@ -166,7 +166,7 @@ const createNumberState
                         const { c } = cp
                         if (c !== null) {
                             if (digitSet(c)) {
-                                return [state(value * 10 + charToInt(c)).begin, []]
+                                return [states(value * 10 + charToInt(c)).begin, []]
                             }
                             if (c === '.') {
                                 return [dot(0.1), []]
@@ -185,7 +185,7 @@ const createNumberState
                         if (c !== null) {
                             if (digitSet(c)) {
                                 return [
-                                    state(value + charToInt(c) * multiplier)
+                                    states(value + charToInt(c) * multiplier)
                                         .dot(multiplier * 0.1),
                                     []
                                 ]
@@ -226,7 +226,7 @@ const createNumberState
                                 return c !== null && digitSet(c)
                                     // Eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
                                     ? [expState(multiplier ** 10 * 10 ** charToInt(c)), []]
-                                    : state(value * (positive ? multiplier : 1 / multiplier))
+                                    : states(value * (positive ? multiplier : 1 / multiplier))
                                         .end(cp)
                             }
                         return expState(1)
@@ -235,7 +235,7 @@ const createNumberState
                 return { begin, dot, end }
             }
 
-        return c => state(charToInt(c)).begin
+        return c => states(charToInt(c)).begin
     }
 
 const escapeMap
@@ -317,7 +317,7 @@ const createStringState
                     = code => i => cp => {
                         const { c } = cp
                         if (c === null || c === '\n') {
-                            // Report error
+                            // Report an error
                             return error(cp)
                         }
                         const h = hex(c)
@@ -328,7 +328,7 @@ const createStringState
                                 : state(value + String.fromCharCode(newCode))
                             return [stateResult, []]
                         }
-                        // Report error
+                        // Report an error
                         return error(cp)
                     }
                 return main
