@@ -65,14 +65,14 @@ type FloatNumber = {
     readonly value: number
 }
 
-type StringToken = {
+export type StringToken = {
     readonly kind: 'StringToken'
     readonly value: string
 }
 
-type Token = Terminal | UnknownCharacterError | Id | FloatNumber | SymbolToken | StringToken
+export type Token = Terminal | UnknownCharacterError | Id | FloatNumber | SymbolToken | StringToken
 
-type TokenAndPosition = {
+export type TokenAndPosition = {
     readonly token: Token
     readonly position: Position
 }
@@ -122,7 +122,7 @@ const createIdState
     : (_: Position) => (_: string) => State
     = position => {
         const nextState:
-            (value: string) => State =
+            (_: string) => State =
             value => cp => {
                 const { c } = cp
                 return c !== null && restIdLetterSet(c)
@@ -132,88 +132,110 @@ const createIdState
         return nextState
     }
 
-const zeroCharCode = '0'.charCodeAt(0)
+const charCode
+    : (_: string) => number
+    = c => c.charCodeAt(0)
+
+const zeroCharCode = charCode('0')
 
 const charToInt
     : (_: string) => number
-    = c => c.charCodeAt(0) - zeroCharCode
+    = c => charCode(c) - zeroCharCode
 
 const createNumberState
     : (_: Position) => (_: string) => State
     = position => {
 
-        const end
-            : (_: number) => State
-            = value => continueWhiteSpace({ token: { kind: 'FloatNumber', value }, position })
+        type NumberState = {
+            readonly begin: State
+            readonly dot: (_: number) => State
+            readonly end: State
+        }
 
-        const begin
-            : (_: number) => State
-            = value => cp => {
-                const { c } = cp
-                if (c !== null) {
-                    if (digitSet(c)) {
-                        return [begin(value * 10 + charToInt(c)), []]
-                    }
-                    if (c === '.') {
-                        return [dot(value)(0.1), []]
-                    }
-                    if (eSet(c)) {
-                        return [exp(value), []]
-                    }
-                }
-                return end(value)(cp)
-            }
+        const state
+            : (_: number) => NumberState
+            = value => {
 
-        const dot
-            : (_: number) => (_: number) => State
-            = value => multiplier => cp => {
-                const { c } = cp
-                if (c !== null) {
-                    if (digitSet(c)) {
-                        return [dot(value + charToInt(c) * multiplier)(multiplier * 0.1), []]
-                    }
-                    if (eSet(c)) {
-                        return [exp(value), []]
-                    }
-                }
-                return end(value)(cp)
-            }
+                const end
+                    : State
+                    = continueWhiteSpace({ token: { kind: 'FloatNumber', value }, position })
 
-        const exp
-            : (_: number) => State
-            = value => cp => {
-                const { c } = cp
-                if (c !== null) {
-                    if (c === '-') {
-                        return [expSign(value)(false), []]
+                const begin
+                    : State
+                    = cp => {
+                        const { c } = cp
+                        if (c !== null) {
+                            if (digitSet(c)) {
+                                return [state(value * 10 + charToInt(c)).begin, []]
+                            }
+                            if (c === '.') {
+                                return [dot(0.1), []]
+                            }
+                            if (eSet(c)) {
+                                return [exp, []]
+                            }
+                        }
+                        return end(cp)
                     }
-                    const plus = expSign(value)(true)
-                    if (c === '+') {
-                        return [plus, []]
-                    }
-                    if (digitSet(c)) {
-                        return plus(cp)
-                    }
-                }
-                return end(value)(cp)
-            }
 
-        const expSign
-            : (_: number) => (_: boolean) => State
-            = value => positive => {
-                const state
+                const dot
                     : (_: number) => State
                     = multiplier => cp => {
                         const { c } = cp
-                        return c !== null && digitSet(c)
-                            // Eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
-                            ? [state(multiplier ** 10 * 10 ** charToInt(c)), []]
-                            : end(value * (positive ? multiplier : 1 / multiplier))(cp)
+                        if (c !== null) {
+                            if (digitSet(c)) {
+                                return [
+                                    state(value + charToInt(c) * multiplier)
+                                        .dot(multiplier * 0.1),
+                                    []
+                                ]
+                            }
+                            if (eSet(c)) {
+                                return [exp, []]
+                            }
+                        }
+                        return end(cp)
                     }
-                return state(1)
+
+                const exp
+                    : State
+                    = cp => {
+                        const { c } = cp
+                        if (c !== null) {
+                            if (c === '-') {
+                                return [expSign(false), []]
+                            }
+                            const plus = expSign(true)
+                            if (c === '+') {
+                                return [plus, []]
+                            }
+                            if (digitSet(c)) {
+                                return plus(cp)
+                            }
+                        }
+                        return end(cp)
+                    }
+
+                const expSign
+                    : (_: boolean) => State
+                    = positive => {
+                        const expState
+                            : (_: number) => State
+                            = multiplier => cp => {
+                                const { c } = cp
+                                return c !== null && digitSet(c)
+                                    // Eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
+                                    ? [expState(multiplier ** 10 * 10 ** charToInt(c)), []]
+                                    : state(value * (positive ? multiplier : 1 / multiplier))
+                                        .end(cp)
+                            }
+                        return expState(1)
+                    }
+
+                return { begin, dot, end }
             }
 
-        return c => begin(charToInt(c))
+        return c => state(charToInt(c)).begin
     }
 
 const escapeMap
@@ -229,9 +251,9 @@ const escapeMap
         'n': '\n',
     }
 
-const hexUpperAOffset = 'A'.charCodeAt(0) - 10
+const hexUpperAOffset = charCode('A') - 10
 
-const hexLowerAOffset = 'a'.charCodeAt(0) - 10
+const hexLowerAOffset = charCode('a') - 10
 
 const hexUppercaseSet = interval('A')('F')
 
