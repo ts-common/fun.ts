@@ -1,6 +1,6 @@
 {
   "name": "@ts-common/fun.ts",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Pure functional subset of JavaScripts/TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "tsc": "tsc",
-    "test": "tsc && tslint -p tsconfig.json && jest"
+    "test": "tsc && tslint -p tsconfig.json && jest",
+    "pack": "npm install && tsc"
   },
   "jest": {
     "testEnvironment": "node",
