@@ -203,3 +203,8 @@ Only definitions and types. Separate declarations of type definitions and specif
   const f = a.x; // ok
   ```
 - generators, async/await?
+
+## References
+
+- https://en.wikipedia.org/wiki/Hindley–Milner_type_system
+- https://en.wikipedia.org/wiki/Type_class
