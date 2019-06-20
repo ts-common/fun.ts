@@ -1,6 +1,6 @@
 # fun.ts
 
-[![Build Status](https://dev.azure.com/ts-common/ts-common/_apis/build/status/ts-common.fun.ts?branchName=master)](https://dev.azure.com/ts-common/ts-common/_build/latest?definitionId=30&branchName=master)
+[![Build Status](https://dev.azure.com/ts-common/ts-common/_apis/build/status/ts-common.fun.ts?branchName=master)](https://dev.azure.com/ts-common/ts-common/_build/latest?definitionId=30&branchName=master) [![npm version](https://badge.fury.io/js/%40ts-common%2Ffun.ts.svg)](https://badge.fury.io/js/%40ts-common%2Ffun.ts)
 
 Pure functional subset of JavaScripts/TypeScript.
 
