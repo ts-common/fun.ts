@@ -208,3 +208,4 @@ Only definitions and types. Separate declarations of type definitions and specif
 
 - https://en.wikipedia.org/wiki/Hindley–Milner_type_system
 - https://en.wikipedia.org/wiki/Type_class
+- https://en.wikipedia.org/wiki/Structural_type_system
