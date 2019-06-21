@@ -24,7 +24,8 @@
         "completed-docs": false,
         "no-if-statement": false,
         "no-magic-numbers": false,
-        "no-bitwise": false
+        "no-bitwise": false,
+        "strict-comparisons": [true, { "allow-string-order-comparison": true, "allow-object-equal-comparison": true }]
     },
     "rulesDirectory": []
 }

@@ -12,7 +12,8 @@
     "src/*.ts"
   ],
   "scripts": {
-    "test": "tsc && tslint -p tsconfig.json && jest",
+    "lint": "tslint -p tsconfig.json -t verbose",
+    "test": "tsc && npm run lint && jest",
     "prepack": "npm install && tsc"
   },
   "jest": {
@@ -65,7 +66,7 @@
     "@types/jest": "^24.0.15",
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
-    "tslint": "^5.17.0",
+    "tslint": "^5.18.0",
     "tslint-immutable": "^6.0.0",
     "typescript": "^3.5.2"
   },
