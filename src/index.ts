@@ -1,5 +1,6 @@
 import * as it from '@ts-common/iterator'
-import { CharAndPosition, Position } from '@ts-common/add-position'
+import { CharAndPosition, Position, terminal } from '@ts-common/add-position'
+import * as meta from './meta'
 
 type CharSet = (_: string) => boolean
 
@@ -42,9 +43,7 @@ type UnknownCharacterError = {
 
 const symbolArray = ['{', '}', ':', ',', '[', ']', '-'] as const
 
-type ArrayItem<T> = T extends readonly (infer U)[] ? U : never
-
-type SymbolType = ArrayItem<typeof symbolArray>
+type SymbolType = meta.ArrayItem<typeof symbolArray>
 
 type SymbolToken = {
     readonly kind: 'SymbolToken'
@@ -89,7 +88,7 @@ export const whiteSpaceState
     : State
     = cp => {
         const { c, position } = cp
-        if (c === null) {
+        if (c === terminal) {
             return createTerminal(position)
         }
         if (whiteSpace(c)) {
@@ -125,7 +124,7 @@ const createIdState
             (_: string) => State =
             value => cp => {
                 const { c } = cp
-                return c !== null && restIdLetterSet(c)
+                return restIdLetterSet(c)
                     ? [nextState(value + c), []]
                     : continueWhiteSpace({ token: { kind: 'Id', value }, position })(cp)
             }
@@ -164,56 +163,36 @@ const createNumberState
                     : State
                     = cp => {
                         const { c } = cp
-                        if (c !== null) {
-                            if (digitSet(c)) {
-                                return [states(value * 10 + charToInt(c)).begin, []]
-                            }
-                            if (c === '.') {
-                                return [dot(0.1), []]
-                            }
-                            if (eSet(c)) {
-                                return [exp, []]
-                            }
-                        }
-                        return end(cp)
+                        return digitSet(c) ? [states(value * 10 + charToInt(c)).begin, []]
+                            : c === '.' ? [dot(0.1), []]
+                            : eSet(c) ? [exp, []]
+                            : end(cp)
                     }
 
                 const dot
                     : (_: number) => State
                     = multiplier => cp => {
                         const { c } = cp
-                        if (c !== null) {
-                            if (digitSet(c)) {
-                                return [
+                        return digitSet(c) ? [
                                     states(value + charToInt(c) * multiplier)
                                         .dot(multiplier * 0.1),
                                     []
                                 ]
-                            }
-                            if (eSet(c)) {
-                                return [exp, []]
-                            }
-                        }
-                        return end(cp)
+                            : eSet(c) ? [exp, []]
+                            : end(cp)
                     }
 
                 const exp
                     : State
                     = cp => {
                         const { c } = cp
-                        if (c !== null) {
-                            if (c === '-') {
-                                return [expSign(false), []]
-                            }
-                            const plus = expSign(true)
-                            if (c === '+') {
-                                return [plus, []]
-                            }
-                            if (digitSet(c)) {
-                                return plus(cp)
-                            }
+                        if (c === '-') {
+                            return [expSign(false), []]
                         }
-                        return end(cp)
+                        const plus = expSign(true)
+                        return c === '+' ? [plus, []]
+                            : digitSet(c) ? plus(cp)
+                            : end(cp)
                     }
 
                 const expSign
@@ -223,7 +202,7 @@ const createNumberState
                             : (_: number) => State
                             = multiplier => cp => {
                                 const { c } = cp
-                                return c !== null && digitSet(c)
+                                return digitSet(c)
                                     // Eg.: E+23 = 10 ** 23 = (10 ** 2) ** 10 * 10 ** 3
                                     ? [expState(multiplier ** 10 * 10 ** charToInt(c)), []]
                                     : states(value * (positive ? multiplier : 1 / multiplier))
@@ -282,17 +261,10 @@ const createStringState
                     : State
                     = cp => {
                         const { c } = cp
-                        if (c === '"') {
-                            return [whiteSpaceState, [tp]]
-                        }
-                        if (c === null || c === '\n') {
-                            // Report an error
-                            return error(cp)
-                        }
-                        if (c === '\\') {
-                            return [escape, []]
-                        }
-                        return [state(value + c), []]
+                        return c === '"' ? [whiteSpaceState, [tp]]
+                            : c === terminal || c === '\n' ? error(cp)
+                            : c === '\\' ? [escape, []]
+                            : [state(value + c), []]
                     }
                 const escape
                     : State
@@ -301,11 +273,9 @@ const createStringState
                         if (c === 'u') {
                             return [unicodeEscape(0)(0), []]
                         }
-                        if (c !== null) {
-                            const result = escapeMap[c]
-                            if (result !== undefined) {
-                                return [state(`${value}${result}`), []]
-                            }
+                        const result = escapeMap[c]
+                        if (result !== undefined) {
+                            return [state(`${value}${result}`), []]
                         }
                         // Report an error
                         return state(`${value}\\`)(cp)
@@ -313,16 +283,13 @@ const createStringState
                 const unicodeEscape
                     : (_: number) => (_: number) => State
                     = code => i => cp => {
-                        const { c } = cp
-                        if (c !== null) {
-                            const h = hex(c)
-                            if (h !== undefined) {
-                                const newCode = (code << 4) + h
-                                const stateResult = i < 3
-                                    ? unicodeEscape(newCode)(i + 1)
-                                    : state(value + String.fromCharCode(newCode))
-                                return [stateResult, []]
-                            }
+                        const h = hex(cp.c)
+                        if (h !== undefined) {
+                            const newCode = (code << 4) + h
+                            const stateResult = i < 3
+                                ? unicodeEscape(newCode)(i + 1)
+                                : state(value + String.fromCharCode(newCode))
+                            return [stateResult, []]
                         }
                         // Report an error
                         return state(`${value}\\u`)(cp)
