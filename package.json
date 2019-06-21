@@ -12,9 +12,8 @@
     "src/*.ts"
   ],
   "scripts": {
-    "tsc": "tsc",
     "test": "tsc && tslint -p tsconfig.json && jest",
-    "pack": "npm install && tsc"
+    "prepack": "npm install && tsc"
   },
   "jest": {
     "testEnvironment": "node",
