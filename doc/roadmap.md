@@ -1,3 +1,9 @@
+# Roadmap
+
+## Stage Zero
+
+Subset parser, no type analysis. 
+
 ## Stage One
 
 Use semicolon as separator.
