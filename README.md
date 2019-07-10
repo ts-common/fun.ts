@@ -126,3 +126,4 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 - https://github.com/tc39/proposal-pattern-matching
 - https://github.com/tc39/proposal-pipeline-operator
 - https://github.com/tc39/proposal-partial-application
+- https://github.com/tc39/proposal-decorators
