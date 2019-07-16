@@ -56,7 +56,7 @@ Typing requires a languages extension. Several safe options are
 - typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
 
 Possible typing languages are
-- TypeScrit,
+- TypeScript,
 - JS docs,
 - JSON-Schema,
 - Some kind of Haskell type notations?
