@@ -1,23 +1,29 @@
 import * as it from '@ts-common/iterator'
 
-// Format: (-Infinity, rightEdge] maps to `value`.
-type IntervalRight<E, T> = {
+// Format: [leftEdge, -Infinity) maps to `value`.
+type IntervalLeft<E, T> = {
+    readonly leftEdge: E
     readonly value: T
-    readonly rightEdge: E
+}
+
+type IntervalStrategy<E, T> = {
+    readonly less: Less<E>
+    readonly isSuccessor: IsSuccessor<E>
+    readonly equal: Equal<T>
 }
 
 type IntervalList<E, T> = {
-    readonly list: it.Iterable<IntervalRight<E, T>>
-    readonly last: T
+    readonly first: T
+    readonly rest: it.Iterable<IntervalLeft<E, T>>
 }
 
 type CachedIntervalList<E, T> = {
-    readonly list: readonly IntervalRight<E, T>[]
+    readonly rest: readonly IntervalLeft<E, T>[]
 } & IntervalList<E, T>
 
 const cache
     : <E, T>(_: IntervalList<E, T>) => CachedIntervalList<E, T>
-    = i => ({ ...i, list: it.toArray(i.list) })
+    = i => ({ ...i, rest: it.toArray(i.rest) })
 
 // Returns `true` if the first argument is less than the second.
 type Less<E> = (_: E) => (_: E) => boolean
@@ -32,18 +38,44 @@ type Equal<T> = (_: T) => (_: T) => boolean
 type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 type MergeStrategy<E, A, B, R> = {
-    readonly less: Less<E>
-    readonly isSuccessor: IsSuccessor<E>
-    readonly equal: Equal<R>
+    readonly interval: IntervalStrategy<E, R>
     readonly reduce: Reduce<A, B, R>
 }
+
+const mergeSeq
+    : <E>(_: Less<E>) => <A>(_: IntervalList<E, A>) => <B>(_: IntervalList<E, B>) => Iterable<E, readonly [A, B]>
+    = less => a => b => it.iterable(function *() {
+        const ai = a.rest[Symbol.iterator]()
+        const bi = b.rest[Symbol.iterator]()
+        let av = a.first
+        let bv = b.first
+        let aiv = ai.next()
+        let biv = bi.next()
+        // tslint:disable-next-line:no-loop-statement
+        while (true) {
+            if (aiv.done) {
+                return
+            }
+            if (biv.done) {
+                return
+            }
+            if (less(aiv.value.leftEdge)(biv.value.leftEdge)) {
+                aiv = ai.next()
+            } else {
+                biv = bi.next()
+            }
+        }
+    })
 
 const merge
     : <E, A, B, R>(_: MergeStrategy<E, A, B, R>)
         => (_: IntervalList<E, A>)
         => (_: IntervalList<E, B>)
         => IntervalList<E, R>
-    = strategy => a => b => ({
-        list: [],
-        last: strategy.reduce(a.last)(b.last)
-    })
+    = strategy => a => b => {
+        const first = strategy.reduce(a.first)(b.first)
+        return {
+            first,
+            rest: []
+        }
+    }
