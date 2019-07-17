@@ -19,13 +19,14 @@
   "jest": {
     "testEnvironment": "node",
     "testMatch": [
-      "**/dist/test/*test.js"
+      "**/dist/test/*Test.js"
     ],
     "reporters": [
       "jest-junit",
       "default"
     ],
     "collectCoverage": true,
+    "collectCoverageFrom": [ "dist/*.js"],
     "coverageThreshold": {
       "global": {
         "branches": 100,
