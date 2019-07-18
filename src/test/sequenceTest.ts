@@ -54,3 +54,34 @@ describe('toArray', () => {
             .toStrictEqual([67, 94, 999])
     })
 })
+
+describe('reverse', () => {
+    it('empty', () => {
+        const result = sequence.reverse(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('several', () => {
+        const result = sequence.toArray(sequence.reverse(sequence.fromArray([1, 2, 3])))
+        expect(result)
+            .toStrictEqual([3, 2, 1])
+    })
+})
+
+describe('concat', () => {
+    it('empty left', () => {
+        const result = sequence.toArray(sequence.concat(sequence.fromArray([1, 2, 3]))(undefined))
+        expect(result)
+            .toStrictEqual([1, 2, 3])
+    })
+    it('empty right', () => {
+        const result = sequence.toArray(sequence.concat(undefined)(sequence.fromArray([7, 8, 9])))
+        expect(result)
+            .toStrictEqual([7, 8, 9])
+    })
+    it('non-empty', () => {
+        const result = sequence.toArray(sequence.concat(sequence.fromArray([1, 2, 3]))(sequence.fromArray([7, 8, 9])))
+        expect(result)
+            .toStrictEqual([1, 2, 3, 7, 8, 9])
+    })
+})
