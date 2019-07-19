@@ -15,21 +15,34 @@ export const fromArray
         return next(0)
     }
 
-export type Reduce<A, T> = (_: A) => (_: T) => A
+export type Reduce<T, R> = (_: R) => (_: T) => R
 
-export const scan
-    : <A, T>(_: Reduce<A, T>) => (_: A) => (_: Sequence<T> | undefined) => Sequence<A>
+export type ScanState<T, R> = {
+    readonly value: R
+    readonly next: (v: T) => ScanState<T, R>
+}
+
+export const accumulator
+    : <T, R>(_: Reduce<T, R>) => (_: R) => ScanState<T, R>
     = reduce => {
-        type A = typeof reduce extends Reduce<infer RA, infer _> ? RA : never
-        type T = typeof reduce extends Reduce<infer _, infer RT> ? RT : never
+        type TR = typeof reduce extends Reduce<infer T0, infer R0> ? readonly [T0, R0] : never
+        type T = TR[0]
+        type R = TR[1]
         const f
-            : (_: A) => (_: Sequence<T> | undefined) => Sequence<A>
-            = value => sequence => ({
+            : (_: R) => ScanState<T, R>
+            = value => ({
                 value,
-                next: () => sequence === undefined ? undefined : f(reduce(value)(sequence.value))(sequence.next())
+                next: v => f(reduce(value)(v))
             })
         return f
     }
+
+export const scan
+    : <T, R>(_: ScanState<T, R>) => (_: Sequence<T> | undefined) => Sequence<R>
+    = ({ value, next }) => sequence => ({
+        value,
+        next: () => sequence === undefined ? undefined : scan(next(sequence.value))(sequence.next())
+    })
 
 export const last
     : <T>(_: Sequence<T>) => T
@@ -41,8 +54,8 @@ export const last
     }
 
 export const fold
-    : <A, T>(_: Reduce<A, T>) => (_: A) => (_: Sequence<T> | undefined) => A
-    = reduce => accumulator => sequence => last(scan(reduce)(accumulator)(sequence))
+    : <T, R>(_: ScanState<T, R>) => (_: Sequence<T> | undefined) => R
+    = state => sequence => last(scan(state)(sequence))
 
 const push
     : <T>(_: readonly T[]) => (_: T) => readonly T[]
@@ -53,8 +66,7 @@ export type OptionalSequence<T> = Sequence<T> | undefined
 export const toArray
     : <T>(_: Sequence<T> | undefined) => readonly T[]
     = sequence => fold
-        (push)
-        <typeof sequence extends Sequence<infer I> | undefined ? I : never>([])
+        (accumulator(push)<typeof sequence extends Sequence<infer I> | undefined ? I : never>([]))
         (sequence)
 
 type ReverseTail<T> = {
@@ -73,11 +85,12 @@ export const reverse
     : <T>(_: Sequence<T> | undefined) => Sequence<T> | undefined
     = sequence => reverseTail({ sequence })
 
-const concatBefore
+export const concatBefore
     : <T>(_: Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
     = b => {
+        type S = typeof b
         const f
-            : (_: typeof b) => typeof b
+            : (_: S) => S
             = a => a === undefined ? b : { value: a.value, next: () => f(a.next()) }
         return f
     }
