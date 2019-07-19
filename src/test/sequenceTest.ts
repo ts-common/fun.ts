@@ -85,3 +85,56 @@ describe('concat', () => {
             .toStrictEqual([1, 2, 3, 7, 8, 9])
     })
 })
+
+describe('flatten', () => {
+    it('empty', () => {
+        const result = sequence.flatten(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('empty items', () => {
+        const result = sequence.flatten(sequence.fromArray([undefined, undefined]))
+        expect(result)
+            .toBeUndefined()
+    })
+    it('some', () => {
+        const result = sequence.toArray(sequence.flatten<number>(sequence.fromArray([
+            sequence.fromArray([1, 2]),
+            sequence.fromArray([5, 7, 9]),
+        ])))
+        expect(result)
+            .toStrictEqual([1, 2, 5, 7, 9])
+    })
+    it('infinite', () => {
+        const result = sequence.toArray(sequence.take
+            (5)
+            (sequence.flatten(sequence.map(_ => sequence.fromArray([2, 3]))(sequence.infinite)))
+        )
+        expect(result)
+            .toStrictEqual([2, 3, 2, 3, 2])
+    })
+})
+
+describe('map', () => {
+    it('non-empty', () => {
+        const f
+            : (_: number) => string
+            = v => `_${v}_`
+        const result = sequence.toArray(sequence.map(f)(sequence.fromArray([1, 2, 3])))
+        expect(result)
+            .toStrictEqual(['_1_', '_2_', '_3_'])
+    })
+})
+
+describe('entries', () => {
+    it('empty', () => {
+        const result = sequence.entries(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('non-empty', () => {
+        const result = sequence.toArray(sequence.entries(sequence.fromArray(['a', 'b', 'c'])))
+        expect(result)
+            .toStrictEqual([[0, 'a'], [1, 'b'], [2, 'c']])
+    })
+})

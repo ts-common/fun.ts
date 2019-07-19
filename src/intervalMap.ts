@@ -44,6 +44,15 @@ type Pair<E, A, B> = {
     readonly b: IntervalMap<E, B>
 }
 
+/*
+export const dedup
+    : <E, T>(_: IntervalMap<E, T>) => IntervalMap<E, T>
+    = ({ first }) => ({
+        first,
+        // A list: sequence.scan()
+    })
+*/
+
 export const merge
     : Merge
     = strategy => {

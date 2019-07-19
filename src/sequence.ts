@@ -17,19 +17,21 @@ export const fromArray
 
 export type Reduce<T, R> = (_: R) => (_: T) => R
 
-export type ScanState<T, R> = {
+export type NextState<T, R> = (_: T) => State<T, R>
+
+export type State<T, R> = {
     readonly value: R
-    readonly next: (v: T) => ScanState<T, R>
+    readonly next: NextState<T, R>
 }
 
 export const accumulator
-    : <T, R>(_: Reduce<T, R>) => (_: R) => ScanState<T, R>
+    : <T, R>(_: Reduce<T, R>) => (_: R) => State<T, R>
     = reduce => {
         type TR = typeof reduce extends Reduce<infer T0, infer R0> ? readonly [T0, R0] : never
         type T = TR[0]
         type R = TR[1]
         const f
-            : (_: R) => ScanState<T, R>
+            : (_: R) => State<T, R>
             = value => ({
                 value,
                 next: v => f(reduce(value)(v))
@@ -37,12 +39,67 @@ export const accumulator
         return f
     }
 
-export const scan
-    : <T, R>(_: ScanState<T, R>) => (_: Sequence<T> | undefined) => Sequence<R>
+export const inclusiveScan
+    : <T, R>(_: NextState<T, R>) => (_: Sequence<T> | undefined) => Sequence<R> | undefined
+    = next => sequence => sequence === undefined ? undefined : exclusiveScan(next(sequence.value))(sequence.next())
+
+export const exclusiveScan
+    : <T, R>(_: State<T, R>) => (_: Sequence<T> | undefined) => Sequence<R>
     = ({ value, next }) => sequence => ({
         value,
-        next: () => sequence === undefined ? undefined : scan(next(sequence.value))(sequence.next())
+        next: () => inclusiveScan(next)(sequence)
     })
+
+export const flatten
+    : <T>(_: Sequence<Sequence<T> | undefined> | undefined) => Sequence<T> | undefined
+    = sequence => {
+        if (sequence === undefined) {
+            return undefined
+        }
+        const { value, next } = sequence
+        return pushFront(() => flatten(next()))(value)
+    }
+
+export const infinite
+    : Sequence<undefined>
+    = ({
+        value: undefined,
+        next: () => infinite
+    })
+
+export const take
+    : (_: number) => <T>(_: Sequence<T> | undefined) => Sequence<T> | undefined
+    = n => sequence => n <= 0 || sequence === undefined
+        ? undefined :
+        ({ value: sequence.value, next: () => take(n - 1)(sequence.next()) })
+
+export type Entry<T> = readonly [number, T]
+
+const nextEntryState
+    : (_: number) => <T>(_: T) => State<T, Entry<T>>
+    = i => v => ({
+        value: [i, v],
+        next: nextEntryState(i + 1)
+    })
+
+export const entries
+    : <T>(_: Sequence<T> | undefined) => Sequence<Entry<T>> | undefined
+    = inclusiveScan(nextEntryState(0))
+
+export const map
+    : <T, R>(_: (_: T) => R) => (_: Sequence<T> | undefined) => Sequence<R> | undefined
+    = f => {
+        type TR = typeof f extends (_: infer T0) => infer R0 ? readonly [T0, R0] : never
+        type T = TR[0]
+        type R = TR[1]
+        const r
+            : (_: Sequence<T> | undefined) => Sequence<R> | undefined
+            = sequence => sequence === undefined ? undefined : ({
+                value: f(sequence.value),
+                next: () => r(sequence.next())
+            })
+        return r
+    }
 
 export const last
     : <T>(_: Sequence<T>) => T
@@ -54,8 +111,8 @@ export const last
     }
 
 export const fold
-    : <T, R>(_: ScanState<T, R>) => (_: Sequence<T> | undefined) => R
-    = state => sequence => last(scan(state)(sequence))
+    : <T, R>(_: State<T, R>) => (_: Sequence<T> | undefined) => R
+    = state => sequence => last(exclusiveScan(state)(sequence))
 
 const push
     : <T>(_: readonly T[]) => (_: T) => readonly T[]
@@ -85,16 +142,16 @@ export const reverse
     : <T>(_: Sequence<T> | undefined) => Sequence<T> | undefined
     = sequence => reverseTail({ sequence })
 
-export const concatBefore
-    : <T>(_: Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
+export const pushFront
+    : <T>(_: () => Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
     = b => {
-        type S = typeof b
+        type S = typeof b extends () => (infer U) ? U : never
         const f
             : (_: S) => S
-            = a => a === undefined ? b : { value: a.value, next: () => f(a.next()) }
+            = a => a === undefined ? b() : { value: a.value, next: () => f(a.next()) }
         return f
     }
 
 export const concat
     : <T>(_: Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
-    = a => b => concatBefore(b)(a)
+    = a => b => pushFront(() => b)(a)
