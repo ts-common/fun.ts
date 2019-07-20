@@ -1,6 +1,8 @@
 // tslint:disable:no-expression-statement
 import * as intervalMap from '../intervalMap'
 import * as sequence from '../sequence'
+import * as sign from '../sign'
+import * as equal from '../equal'
 
 type IntervalMap = intervalMap.IntervalMap<number, string>
 
@@ -9,9 +11,9 @@ type MergeStrategy = intervalMap.MergeStrategy<number, string, string, string>
 const strategy
     : MergeStrategy
     = {
-        sign: a => b => a === b ? 0 : a < b ? -1 : 1,
+        sign: sign.numberCompare,
         reduce: a => b => `${a}.${b}`,
-        equal: a => b => a === b
+        equal: equal.strictEqual
     }
 
 type IntervalMapN = intervalMap.IntervalMap<number, number>
@@ -28,15 +30,15 @@ const strategyN
 
 describe('merge', () => {
     it('empty', () => {
-        const a: IntervalMap = { first: 'first' }
-        const b: IntervalMap = { first: 'second' }
+        const a: IntervalMap = { first: 'first', list: undefined }
+        const b: IntervalMap = { first: 'second', list: undefined }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r)
             .toStrictEqual({ first: 'first.second', list: undefined })
     })
     it('left', () => {
         const a: IntervalMap = { first: 'a0', list: sequence.fromArray([{ edge: 12, value: 'a1'}]) }
-        const b: IntervalMap = { first: 'b0' }
+        const b: IntervalMap = { first: 'b0', list: undefined }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r.first)
             .toBe('a0.b0')
@@ -44,7 +46,7 @@ describe('merge', () => {
             .toStrictEqual([{ edge: 12, value: `a1.b0`}])
     })
     it('right', () => {
-        const a: IntervalMap = { first: 'a0' }
+        const a: IntervalMap = { first: 'a0', list: undefined }
         const b: IntervalMap = { first: 'b0', list: sequence.fromArray([{ edge: 12, value: 'b1'}]) }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r.first)

@@ -29,7 +29,7 @@ describe('fold', () => {
         const plus
             : (_: number) => (_: number) => number
             = a => b => a + b
-        const result = sequence.fold(sequence.accumulator(plus)(10))(undefined)
+        const result = sequence.exclusiveFold(sequence.accumulator(plus)(10))(undefined)
         expect(result)
             .toBe(10)
     })
@@ -37,7 +37,7 @@ describe('fold', () => {
         const reduce
             : (_: number) => (_: number) => number
             = a => b => a + b
-        const result = sequence.fold(sequence.accumulator(reduce)(10))(sequence.fromArray([12, 9]))
+        const result = sequence.exclusiveFold(sequence.accumulator(reduce)(10))(sequence.fromArray([12, 9]))
         expect(result)
             .toBe(31)
     })
