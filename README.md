@@ -32,6 +32,7 @@ The subset can be used as a safe script or as a target platform for other progra
 - The language validator should be written on JavaScript/TypeScript so it can run in a browser.
 - no implicit type conversions. For example `?:` should only accept `bool` type.
 - Type system should allow to describe monads. Example on pseudo-TypeScript
+
   ```ts
   type MonadStrategy = {
       type Monad<T>; // this line can't be compiled in TypeScript.
@@ -46,16 +47,19 @@ The subset can be used as a safe script or as a target platform for other progra
       readonly join: <T>(m: Monad { T: Monad { T } }) => Monad { T }
   }
   ```
+
 - Type system should be able to reflect JSON-Schema.
 
 ## Typing
 
 Typing requires a languages extension. Several safe options are
+
 - embed typing in comments.
 - embed typing in a separate file.
 - typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`.
 
 Possible typing languages are
+
 - TypeScript,
 - JS docs,
 - JSON-Schema,
@@ -76,6 +80,7 @@ Possible typing languages are
   ```
 
   Simplified types (incompatable with TypeScript).
+
   ```js
   const myFunc
       //: number => string
@@ -91,6 +96,7 @@ Possible typing languages are
 
   }*/
   ```
+
 - TypeScript
 
   ```ts
