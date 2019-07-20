@@ -4,11 +4,11 @@
 
 Purely functional subset of JavaScripts/TypeScript.
 
-There are a lot of pure functional languages that can be compiled to JavaScript. Usually, the biggest problem with these libraries is inteoperability. For example, if you have a big project written on JavaScript, it's very challenging to rewrite parts of this project step-by-step using another language. https://github.com/jashkenas/coffeescript/wiki/List-of-languages-that-compile-to-JS#static-typing.
+There are a lot of pure functional languages that can be compiled to JavaScript. Usually, the biggest problem with these libraries is interoperability. For example, if you have a big project written on JavaScript, it's very challenging to rewrite parts of this project step-by-step using another language. https://github.com/jashkenas/coffeescript/wiki/List-of-languages-that-compile-to-JS#static-typing.
 
 The project is not another functional language that can be compiled into JavaScript. The project tries to define a subset of JavaScript that can be formally verified.
 
-The subset can be used as a safe script or as a target platform for other programming languages. 
+The subset can be used as a safe script or as a target platform for other programming languages.
 
 [Roadmap](doc/roadmap.md)
 
@@ -38,7 +38,7 @@ The subset can be used as a safe script or as a target platform for other progra
       readonly just: <T>(v: T) => Monad<T>
       readonly join: <T>(m: Monad<Monad<T>>) => Monad<T>
   }
-  
+
   // Or
   type MonadStrategy = {
       type Monad { type T }; // this line can't be compiled in TypeScript.
@@ -53,7 +53,7 @@ The subset can be used as a safe script or as a target platform for other progra
 Typing requires a languages extension. Several safe options are
 - embed typing in comments.
 - embed typing in a separate file.
-- typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`. 
+- typing is based on special run-time definitions, similar to Json-Schema. For example `const MyType = { type: 'string', ... }`.
 
 Possible typing languages are
 - TypeScript,
@@ -64,35 +64,35 @@ Possible typing languages are
 ### Proposed Typing
 
 - JavaScript. Starts with `//:` or `/*:`
-  
+
   ```js
   const myFunc
       //: (_: number) => string
       = v => v.toString()
   ```
-  
+
   ```js
   const myFunc /*: (_: number) => string */ = v => v.toString()
   ```
-  
+
   Simplified types (incompatable with TypeScript).
   ```js
   const myFunc
       //: number => string
       = v = v.toString()
   ```
-  
+
   ```js
   //type MyType = ...
   ```
-  
+
   ```ts
   /*type MyType = {
-  
+
   }*/
   ```
 - TypeScript
-  
+
   ```ts
   const myFunc
       : (_: number) => string
