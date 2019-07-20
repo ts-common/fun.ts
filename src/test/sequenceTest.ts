@@ -1,5 +1,6 @@
 // tslint:disable:no-expression-statement no-throw
 import * as sequence from '../sequence'
+import * as equal from '../equal'
 
 describe('fromArray', () => {
     it('empty', () => {
@@ -106,6 +107,7 @@ describe('flatten', () => {
             .toStrictEqual([1, 2, 5, 7, 9])
     })
     it('infinite', () => {
+        // The test is trying to make sure that `flatten` is lazy and doesn't concatenate all sequences.
         const result = sequence.toArray(sequence.take
             (5)
             (sequence.flatten(sequence.map(_ => sequence.fromArray([2, 3]))(sequence.infinite)))
@@ -136,5 +138,13 @@ describe('entries', () => {
         const result = sequence.toArray(sequence.entries(sequence.fromArray(['a', 'b', 'c'])))
         expect(result)
             .toStrictEqual([[0, 'a'], [1, 'b'], [2, 'c']])
+    })
+})
+
+describe('filterScan', () => {
+    it('dedup', () => {
+        const result = sequence.toArray(sequence.dedup(equal.strictEqual)(sequence.fromArray([1, 2, 2, 4, 5, 5])))
+        expect(result)
+            .toStrictEqual([1, 2, 4, 5])
     })
 })

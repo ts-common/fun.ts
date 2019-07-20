@@ -11,6 +11,19 @@ const strategy
     = {
         sign: a => b => a === b ? 0 : a < b ? -1 : 1,
         reduce: a => b => `${a}.${b}`,
+        equal: a => b => a === b
+    }
+
+type IntervalMapN = intervalMap.IntervalMap<number, number>
+
+type MergeStrategyN = intervalMap.MergeStrategy<number, number, number, number>
+
+const strategyN
+    : MergeStrategyN
+    = {
+        sign: a => b => a === b ? 0 : a < b ? -1 : 1,
+        reduce: a => b => a < b ? a : b,
+        equal: a => b => a === b
     }
 
 describe('merge', () => {
@@ -66,6 +79,34 @@ describe('merge', () => {
                 { edge: 12, value: 'a3.b1' },
                 { edge: 24, value: 'a3.b2' },
                 { edge: 30, value: 'a4.b2' }
+            ])
+    })
+    it('dedup', () => {
+        const a: IntervalMapN = {
+            first: 0,
+            list: sequence.fromArray([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 },
+                { edge: 12, value: 3 },
+                { edge: 30, value: 4 }
+            ])
+        }
+        const b: IntervalMapN = {
+            first: 0,
+            list: sequence.fromArray([
+                { edge: 12, value: 1 },
+                { edge: 24, value: 5 }
+            ])
+        }
+        const r = intervalMap.merge(strategyN)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(sequence.toArray(r.list))
+            .toStrictEqual([
+                { edge: 0, value: 0 },
+                { edge: 12, value: 1 },
+                { edge: 24, value: 3 },
+                { edge: 30, value: 4 },
             ])
     })
 })

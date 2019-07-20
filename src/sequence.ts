@@ -1,4 +1,5 @@
 import * as meta from './meta'
+import * as equal from './equal'
 
 export type Sequence<T> = {
     readonly value: T
@@ -50,6 +51,42 @@ export const exclusiveScan
         next: () => inclusiveScan(next)(sequence)
     })
 
+export type FilterState<T> = State<T, boolean>
+
+export type NextFilterState<T> = NextState<T, boolean>
+
+export const scanFilter
+    : <T>(_: NextFilterState<T>) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
+    = nextFilterState => sequence => {
+        if (sequence === undefined) {
+            return undefined
+        }
+        const { value } = sequence
+        const state = nextFilterState(value)
+        const next = () => scanFilter(state.next)(sequence.next())
+        return state.value ? { value, next } : next()
+    }
+
+export const dedupNextState
+    : <T>(_: equal.Equal<T>) => NextFilterState<T>
+    = e => {
+        type T = typeof e extends equal.Equal<infer _T> ? _T : never
+        const create
+            : (_: boolean) => (_: T) => FilterState<T>
+            = value => current => ({
+                value,
+                next: next(current)
+            })
+        const next
+            : (_: T) => (_: T) => FilterState<T>
+            = prior => current => create(!e(prior)(current))(current)
+        return create(true)
+    }
+
+export const dedup
+    : <T>(_: equal.Equal<T>) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
+    = e => scanFilter(dedupNextState(e))
+
 export const flatten
     : <T>(_: Sequence<Sequence<T> | undefined> | undefined) => Sequence<T> | undefined
     = sequence => {
@@ -57,7 +94,7 @@ export const flatten
             return undefined
         }
         const { value, next } = sequence
-        return pushFront(() => flatten(next()))(value)
+        return concatFront(() => flatten(next()))(value)
     }
 
 export const infinite
@@ -142,7 +179,7 @@ export const reverse
     : <T>(_: Sequence<T> | undefined) => Sequence<T> | undefined
     = sequence => reverseTail({ sequence })
 
-export const pushFront
+const concatFront
     : <T>(_: () => Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
     = b => {
         type S = typeof b extends () => (infer U) ? U : never
@@ -154,4 +191,4 @@ export const pushFront
 
 export const concat
     : <T>(_: Sequence<T> | undefined) => (_: Sequence<T> | undefined) => Sequence<T> | undefined
-    = a => b => pushFront(() => b)(a)
+    = a => b => concatFront(() => b)(a)

@@ -1,4 +1,5 @@
 import * as sequence from './sequence'
+import * as equal from './equal'
 
 export type IntervalLeft<E, T> = {
     readonly edge: E
@@ -32,6 +33,7 @@ export type Sign<E> = (_: E) => (_: E) => SignType
 export type MergeStrategy<E, A, B, R> = {
     readonly sign: Sign<E>
     readonly reduce: Reduce<A, B, R>
+    readonly equal: equal.Equal<R>
 }
 
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
@@ -43,15 +45,6 @@ type Pair<E, A, B> = {
     readonly a: IntervalMap<E, A>
     readonly b: IntervalMap<E, B>
 }
-
-/*
-export const dedup
-    : <E, T>(_: IntervalMap<E, T>) => IntervalMap<E, T>
-    = ({ first }) => ({
-        first,
-        // A list: sequence.scan()
-    })
-*/
 
 export const merge
     : Merge
@@ -107,11 +100,14 @@ export const merge
                     }
                 }
             }
+        const dedupEqual
+            : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
+            = a => b => strategy.equal(a.value)(b.value)
         const r
             : (_: IntervalMap<E, A>) => (_: IntervalMap<E, B>) => IntervalMap<E, R>
             = a => b => {
                 const first = strategy.reduce(a.first)(b.first)
-                const list = f({ a, b })
+                const list = sequence.dedup(dedupEqual)(f({ a, b }))
                 return {
                     first,
                     list,
