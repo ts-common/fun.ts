@@ -5,34 +5,34 @@ import { IntervalMap, strategy, IntervalMapN, strategyN } from './intervalMapStr
 
 describe('merge', () => {
     it('empty', () => {
-        const a: IntervalMap = { first: 'first', list: undefined }
-        const b: IntervalMap = { first: 'second', list: undefined }
+        const a: IntervalMap = { first: 'first', rest: undefined }
+        const b: IntervalMap = { first: 'second', rest: undefined }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r)
             .toStrictEqual({ first: 'first.second', list: undefined })
     })
     it('left', () => {
-        const a: IntervalMap = { first: 'a0', list: sequence.fromArray([{ edge: 12, value: 'a1'}]) }
-        const b: IntervalMap = { first: 'b0', list: undefined }
+        const a: IntervalMap = { first: 'a0', rest: sequence.fromArray([{ edge: 12, value: 'a1'}]) }
+        const b: IntervalMap = { first: 'b0', rest: undefined }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r.first)
             .toBe('a0.b0')
-        expect(sequence.toArray(r.list))
+        expect(sequence.toArray(r.rest))
             .toStrictEqual([{ edge: 12, value: `a1.b0`}])
     })
     it('right', () => {
-        const a: IntervalMap = { first: 'a0', list: undefined }
-        const b: IntervalMap = { first: 'b0', list: sequence.fromArray([{ edge: 12, value: 'b1'}]) }
+        const a: IntervalMap = { first: 'a0', rest: undefined }
+        const b: IntervalMap = { first: 'b0', rest: sequence.fromArray([{ edge: 12, value: 'b1'}]) }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r.first)
             .toBe('a0.b0')
-        expect(sequence.toArray(r.list))
+        expect(sequence.toArray(r.rest))
             .toStrictEqual([{ edge: 12, value: `a0.b1`}])
     })
     it('mix', () => {
         const a: IntervalMap = {
             first: 'a0',
-            list: sequence.fromArray([
+            rest: sequence.fromArray([
                 { edge: 0, value: 'a1'},
                 { edge: 5, value: `a2` },
                 { edge: 12, value: 'a3' },
@@ -41,7 +41,7 @@ describe('merge', () => {
         }
         const b: IntervalMap = {
             first: 'b0',
-            list: sequence.fromArray([
+            rest: sequence.fromArray([
                 { edge: 12, value: 'b1'},
                 { edge: 24, value: 'b2' }
             ])
@@ -49,7 +49,7 @@ describe('merge', () => {
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r.first)
             .toBe('a0.b0')
-        expect(sequence.toArray(r.list))
+        expect(sequence.toArray(r.rest))
             .toStrictEqual([
                 { edge: 0, value: 'a1.b0' },
                 { edge: 5, value: 'a2.b0' },
@@ -61,7 +61,7 @@ describe('merge', () => {
     it('dedup', () => {
         const a: IntervalMapN = {
             first: 0,
-            list: sequence.fromArray([
+            rest: sequence.fromArray([
                 { edge: 0, value: 1},
                 { edge: 5, value: 2 },
                 { edge: 12, value: 3 },
@@ -70,7 +70,7 @@ describe('merge', () => {
         }
         const b: IntervalMapN = {
             first: 0,
-            list: sequence.fromArray([
+            rest: sequence.fromArray([
                 { edge: 12, value: 1 },
                 { edge: 24, value: 5 }
             ])
@@ -78,7 +78,7 @@ describe('merge', () => {
         const r = intervalMap.merge(strategyN)(a)(b)
         expect(r.first)
             .toBe(0)
-        expect(sequence.toArray(r.list))
+        expect(sequence.toArray(r.rest))
             .toStrictEqual([
                 { edge: 0, value: 0 },
                 { edge: 12, value: 1 },

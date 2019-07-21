@@ -10,7 +10,7 @@ export type IntervalLeft<E, T> = {
 
 export type IntervalMap<E, T> = {
     readonly first: T
-    readonly list: sequence.Sequence<IntervalLeft<E, T>>
+    readonly rest: sequence.Sequence<IntervalLeft<E, T>>
 }
 
 export type Strategy<E, T> = {
@@ -33,7 +33,7 @@ const drop
     = ({ value, next }) => ({
         map: {
             first: value.value,
-            list: next()
+            rest: next()
         },
         edge: value.edge
     })
@@ -68,36 +68,36 @@ export const merge
         const listMerge
             : (_: Pair<E, A, B>) => sequence.Sequence<IntervalLeft<E, R>>
             = ({ a, b }) => {
-                const aList = a.list
-                const bList = b.list
-                if (aList === undefined) {
-                    if (bList === undefined) {
+                const aRest = a.rest
+                const bRest = b.rest
+                if (aRest === undefined) {
+                    if (bRest === undefined) {
                         return undefined
                     }
-                    const { map, edge } = drop(bList)
+                    const { map, edge } = drop(bRest)
                     return next(edge)({ a, b: map })
                 }
-                if (bList === undefined) {
-                    const { map, edge } = drop(aList)
+                if (bRest === undefined) {
+                    const { map, edge } = drop(aRest)
                     return next(edge)({ a: map, b })
                 }
-                const aEdge = aList.value.edge
-                const bEdge = bList.value.edge
+                const aEdge = aRest.value.edge
+                const bEdge = bRest.value.edge
                 switch (intervalMap.sign(aEdge)(bEdge)) {
                     // If aEdge < bEdge
                     case -1: {
-                        const { map, edge } = drop(aList)
+                        const { map, edge } = drop(aRest)
                         return next(edge)({ a: map, b })
                     }
                     // If aEdge > bEdge
                     case 1: {
-                        const { map, edge } = drop(bList)
+                        const { map, edge } = drop(bRest)
                         return next(edge)({ a, b: map })
                     }
                     // If aEdge === bEdge
                     default: {
-                        const aDrop = drop(aList)
-                        const bDrop = drop(bList)
+                        const aDrop = drop(aRest)
+                        const bDrop = drop(bRest)
                         return next(aDrop.edge)({ a: aDrop.map, b: bDrop.map })
                     }
                 }
@@ -109,10 +109,10 @@ export const merge
             : (_: IntervalMap<E, A>) => (_: IntervalMap<E, B>) => IntervalMap<E, R>
             = a => b => {
                 const first = reduce(a.first)(b.first)
-                const list = sequence.dedup(dedupEqual)(listMerge({ a, b }))
+                const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
                 return {
                     first,
-                    list,
+                    rest,
                 }
             }
         return result
