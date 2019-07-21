@@ -1,6 +1,7 @@
 // tslint:disable:no-expression-statement no-throw
 import * as sequence from '../sequence'
 import * as equal from '../equal'
+import * as predicate from '../predicate'
 
 describe('fromArray', () => {
     it('empty', () => {
@@ -146,5 +147,16 @@ describe('filterScan', () => {
         const result = sequence.toArray(sequence.dedup(equal.strictEqual)(sequence.fromArray([1, 2, 2, 4, 5, 5])))
         expect(result)
             .toStrictEqual([1, 2, 4, 5])
+    })
+})
+
+describe('filter', () => {
+    it('odd', () => {
+        const odd
+            : predicate.Predicate<number>
+            = v => v % 2 !== 0
+        const result = sequence.toArray(sequence.filter(odd)(sequence.fromArray([1, 2, 3, 4])))
+        expect(result)
+            .toStrictEqual([1, 3])
     })
 })

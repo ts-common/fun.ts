@@ -1,6 +1,7 @@
 import * as meta from './meta'
 import * as equal from './equal'
 import * as optional from './optional'
+import * as predicate from './predicate'
 
 export type NonEmptySequence<T> = {
     readonly value: T
@@ -65,6 +66,19 @@ export const scanFilter
         const nextState = () => scanFilter(state.next)(next())
         return state.value ? { value, next: nextState } : nextState()
     })
+
+export const filter
+    : <T>(_: predicate.Predicate<T>) => (_: Sequence<T>) => Sequence<T>
+    = p => {
+        type T = typeof p extends predicate.Predicate<infer _T> ? _T : never
+        const result
+            : (_: Sequence<T>) => Sequence<T>
+            = optional.map(({ value, next }) => {
+                const filterNext = () => result(next())
+                return p(value) ? { value, next: filterNext } : filterNext()
+            })
+        return result
+    }
 
 const dedupNextState
     : <T>(_: equal.Equal<T>) => NextFilterState<T>

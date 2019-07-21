@@ -2,6 +2,7 @@ import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
 
+// [edge, +Infinity)
 export type IntervalLeft<E, T> = {
     readonly edge: E
     readonly value: T
@@ -10,6 +11,16 @@ export type IntervalLeft<E, T> = {
 export type IntervalMap<E, T> = {
     readonly first: T
     readonly list: sequence.Sequence<IntervalLeft<E, T>>
+}
+
+export type Strategy<E, T> = {
+    readonly sign: sign.Compare<E>
+    readonly equal: equal.Equal<T>
+}
+
+export type MergeStrategy<E, A, B, R> = {
+    readonly intervalMap: Strategy<E, R>
+    readonly reduce: Reduce<A, B, R>
 }
 
 type DropResult<E, T> = {
@@ -27,12 +38,6 @@ const drop
         edge: value.edge
     })
 
-export type MergeStrategy<E, A, B, R> = {
-    readonly sign: sign.Compare<E>
-    readonly equal: equal.Equal<R>
-    readonly reduce: Reduce<A, B, R>
-}
-
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge =
@@ -45,18 +50,19 @@ type Pair<E, A, B> = {
 
 export const merge
     : Merge
-    = strategy => {
-        type S = typeof strategy extends MergeStrategy<infer TE, infer TA, infer TB, infer TR>
-            ? readonly [TE, TA, TB, TR]
+    = ({ intervalMap, reduce }) => {
+        type S = typeof intervalMap extends Strategy<infer _E, infer _R>
+            ? readonly [_E, _R]
             : never
         type E = S[0]
-        type A = S[1]
-        type B = S[2]
-        type R = S[3]
+        type R = S[1]
+        type RA = typeof reduce extends Reduce<infer _A, infer _B, infer _R> ? readonly [_A, _B, _R] : never
+        type A = RA[0]
+        type B = RA[1]
         const next
             : (_: E) => (_: Pair<E, A, B>) => sequence.NonEmptySequence<IntervalLeft<E, R>>
             = edge => p => ({
-                value: { value: strategy.reduce(p.a.first)(p.b.first), edge },
+                value: { value: reduce(p.a.first)(p.b.first), edge },
                 next: () => listMerge(p)
             })
         const listMerge
@@ -77,7 +83,7 @@ export const merge
                 }
                 const aEdge = aList.value.edge
                 const bEdge = bList.value.edge
-                switch (strategy.sign(aEdge)(bEdge)) {
+                switch (intervalMap.sign(aEdge)(bEdge)) {
                     // If aEdge < bEdge
                     case -1: {
                         const { map, edge } = drop(aList)
@@ -98,11 +104,11 @@ export const merge
             }
         const dedupEqual
             : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
-            = a => b => strategy.equal(a.value)(b.value)
+            = a => b => intervalMap.equal(a.value)(b.value)
         const result
             : (_: IntervalMap<E, A>) => (_: IntervalMap<E, B>) => IntervalMap<E, R>
             = a => b => {
-                const first = strategy.reduce(a.first)(b.first)
+                const first = reduce(a.first)(b.first)
                 const list = sequence.dedup(dedupEqual)(listMerge({ a, b }))
                 return {
                     first,

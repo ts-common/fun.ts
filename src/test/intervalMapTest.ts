@@ -1,32 +1,7 @@
 // tslint:disable:no-expression-statement
 import * as intervalMap from '../intervalMap'
 import * as sequence from '../sequence'
-import * as sign from '../sign'
-import * as equal from '../equal'
-
-type IntervalMap = intervalMap.IntervalMap<number, string>
-
-type MergeStrategy = intervalMap.MergeStrategy<number, string, string, string>
-
-const strategy
-    : MergeStrategy
-    = {
-        sign: sign.numberCompare,
-        reduce: a => b => `${a}.${b}`,
-        equal: equal.strictEqual
-    }
-
-type IntervalMapN = intervalMap.IntervalMap<number, number>
-
-type MergeStrategyN = intervalMap.MergeStrategy<number, number, number, number>
-
-const strategyN
-    : MergeStrategyN
-    = {
-        sign: a => b => a === b ? 0 : a < b ? -1 : 1,
-        reduce: a => b => a < b ? a : b,
-        equal: a => b => a === b
-    }
+import { IntervalMap, strategy, IntervalMapN, strategyN } from './intervalMapStrategy'
 
 describe('merge', () => {
     it('empty', () => {
