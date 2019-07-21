@@ -1,5 +1,7 @@
 // tslint:disable:no-expression-statement no-throw
 import * as sequence from '../sequence'
+import * as equal from '../equal'
+import * as predicate from '../predicate'
 
 describe('fromArray', () => {
     it('empty', () => {
@@ -25,10 +27,10 @@ describe('fromArray', () => {
 
 describe('fold', () => {
     it('empty', () => {
-        const reduce
+        const plus
             : (_: number) => (_: number) => number
             = a => b => a + b
-        const result = sequence.fold(reduce)(10)(undefined)
+        const result = sequence.exclusiveFold(sequence.accumulator(plus)(10))(undefined)
         expect(result)
             .toBe(10)
     })
@@ -36,7 +38,7 @@ describe('fold', () => {
         const reduce
             : (_: number) => (_: number) => number
             = a => b => a + b
-        const result = sequence.fold(reduce)(10)(sequence.fromArray([12, 9]))
+        const result = sequence.exclusiveFold(sequence.accumulator(reduce)(10))(sequence.fromArray([12, 9]))
         expect(result)
             .toBe(31)
     })
@@ -83,5 +85,91 @@ describe('concat', () => {
         const result = sequence.toArray(sequence.concat(sequence.fromArray([1, 2, 3]))(sequence.fromArray([7, 8, 9])))
         expect(result)
             .toStrictEqual([1, 2, 3, 7, 8, 9])
+    })
+})
+
+describe('flatten', () => {
+    it('empty', () => {
+        const result = sequence.flatten(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('empty items', () => {
+        const result = sequence.flatten(sequence.fromArray([undefined, undefined]))
+        expect(result)
+            .toBeUndefined()
+    })
+    it('some', () => {
+        const result = sequence.toArray(sequence.flatten<number>(sequence.fromArray([
+            sequence.fromArray([1, 2]),
+            sequence.fromArray([5, 7, 9]),
+        ])))
+        expect(result)
+            .toStrictEqual([1, 2, 5, 7, 9])
+    })
+    it('infinite', () => {
+        // The test is trying to make sure that `flatten` is lazy and doesn't concatenate all sequences.
+        const result = sequence.toArray(sequence.take
+            (5)
+            (sequence.flatten(sequence.map(_ => sequence.fromArray([2, 3]))(sequence.infinite)))
+        )
+        expect(result)
+            .toStrictEqual([2, 3, 2, 3, 2])
+    })
+})
+
+describe('map', () => {
+    it('non-empty', () => {
+        const f
+            : (_: number) => string
+            = v => `_${v}_`
+        const result = sequence.toArray(sequence.map(f)(sequence.fromArray([1, 2, 3])))
+        expect(result)
+            .toStrictEqual(['_1_', '_2_', '_3_'])
+    })
+})
+
+describe('entries', () => {
+    it('empty', () => {
+        const result = sequence.entries(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('non-empty', () => {
+        const result = sequence.toArray(sequence.entries(sequence.fromArray(['a', 'b', 'c'])))
+        expect(result)
+            .toStrictEqual([[0, 'a'], [1, 'b'], [2, 'c']])
+    })
+})
+
+describe('filterScan', () => {
+    it('dedup', () => {
+        const result = sequence.toArray(sequence.dedup(equal.strictEqual)(sequence.fromArray([1, 2, 2, 4, 5, 5])))
+        expect(result)
+            .toStrictEqual([1, 2, 4, 5])
+    })
+})
+
+describe('filter', () => {
+    it('odd', () => {
+        const odd
+            : predicate.Predicate<number>
+            = v => v % 2 !== 0
+        const result = sequence.toArray(sequence.filter(odd)(sequence.fromArray([1, 2, 3, 4])))
+        expect(result)
+            .toStrictEqual([1, 3])
+    })
+})
+
+describe('size', () => {
+    it('empty', () => {
+        const result = sequence.size(undefined)
+        expect(result)
+            .toBe(0)
+    })
+    it('5', () => {
+        const result = sequence.size(sequence.fromArray([0, 1, 2, 3, 4]))
+        expect(result)
+            .toBe(5)
     })
 })

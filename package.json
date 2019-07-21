@@ -1,6 +1,6 @@
 {
   "name": "@ts-common/fun.ts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Pure functional subset of JavaScripts/TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
