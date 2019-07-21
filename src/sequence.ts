@@ -195,3 +195,16 @@ const concatFront
 export const concat
     : <T>(_: Sequence<T>) => (_: Sequence<T>) => Sequence<T>
     = a => b => concatFront(() => b)(a)
+
+type SizeState<T> = {
+    readonly value: number
+    readonly rest: Sequence<T>
+}
+
+const foldSizeState
+    : <T>(_: SizeState<T>) => number
+    = ({ value, rest }) => rest === undefined ? value : foldSizeState({ value: value + 1, rest: rest.next() })
+
+export const size
+    : <T>(_: Sequence<T>) => number
+    = rest => foldSizeState({ value: 0, rest })

@@ -9,7 +9,7 @@ describe('merge', () => {
         const b: IntervalMap = { first: 'second', rest: undefined }
         const r = intervalMap.merge(strategy)(a)(b)
         expect(r)
-            .toStrictEqual({ first: 'first.second', list: undefined })
+            .toStrictEqual({ first: 'first.second', rest: undefined })
     })
     it('left', () => {
         const a: IntervalMap = { first: 'a0', rest: sequence.fromArray([{ edge: 12, value: 'a1'}]) }

@@ -160,3 +160,16 @@ describe('filter', () => {
             .toStrictEqual([1, 3])
     })
 })
+
+describe('size', () => {
+    it('empty', () => {
+        const result = sequence.size(undefined)
+        expect(result)
+            .toBe(0)
+    })
+    it('5', () => {
+        const result = sequence.size(sequence.fromArray([0, 1, 2, 3, 4]))
+        expect(result)
+            .toBe(5)
+    })
+})
