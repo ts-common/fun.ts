@@ -8,7 +8,7 @@ export type IntervalLeft<E, T> = {
     readonly value: T
 }
 
-export type IntervalMap<E, T> = {
+export type IntervalSequence<E, T> = {
     readonly first: T
     readonly rest: sequence.Sequence<IntervalLeft<E, T>>
 }
@@ -19,12 +19,12 @@ export type Strategy<E, T> = {
 }
 
 export type MergeStrategy<E, A, B, R> = {
-    readonly intervalMap: Strategy<E, R>
+    readonly intervalSequence: Strategy<E, R>
     readonly reduce: Reduce<A, B, R>
 }
 
 type DropResult<E, T> = {
-    readonly map: IntervalMap<E, T>
+    readonly map: IntervalSequence<E, T>
     readonly edge: E
 }
 
@@ -40,18 +40,21 @@ const drop
 
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
-export type Merge =
-    <E, A, B, R>(_: MergeStrategy<E, A, B, R>) => (_: IntervalMap<E, A>) => (_: IntervalMap<E, B>) => IntervalMap<E, R>
+export type Merge
+    = <E, A, B, R>(_: MergeStrategy<E, A, B, R>)
+    => (_: IntervalSequence<E, A>)
+    => (_: IntervalSequence<E, B>)
+    => IntervalSequence<E, R>
 
 type Pair<E, A, B> = {
-    readonly a: IntervalMap<E, A>
-    readonly b: IntervalMap<E, B>
+    readonly a: IntervalSequence<E, A>
+    readonly b: IntervalSequence<E, B>
 }
 
 export const merge
     : Merge
-    = ({ intervalMap, reduce }) => {
-        type S = typeof intervalMap extends Strategy<infer _E, infer _R>
+    = ({ intervalSequence, reduce }) => {
+        type S = typeof intervalSequence extends Strategy<infer _E, infer _R>
             ? readonly [_E, _R]
             : never
         type E = S[0]
@@ -83,7 +86,7 @@ export const merge
                 }
                 const aEdge = aRest.value.edge
                 const bEdge = bRest.value.edge
-                switch (intervalMap.sign(aEdge)(bEdge)) {
+                switch (intervalSequence.sign(aEdge)(bEdge)) {
                     // If aEdge < bEdge
                     case -1: {
                         const { map, edge } = drop(aRest)
@@ -104,9 +107,9 @@ export const merge
             }
         const dedupEqual
             : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
-            = a => b => intervalMap.equal(a.value)(b.value)
+            = a => b => intervalSequence.equal(a.value)(b.value)
         const result
-            : (_: IntervalMap<E, A>) => (_: IntervalMap<E, B>) => IntervalMap<E, R>
+            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => {
                 const first = reduce(a.first)(b.first)
                 const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
