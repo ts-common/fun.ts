@@ -89,5 +89,8 @@ export const merge
                     ? dedup({ value, edge: interval.edge })
                     : { value, edge: () => ({ value: e.value, interval: dedup(interval) }) }
             }
-        return main
+        return a => b => {
+            const result = main(a)(b)
+            return dedup(result)
+        }
     }

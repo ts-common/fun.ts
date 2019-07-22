@@ -5,8 +5,8 @@ import { IntervalSequence, strategy, IntervalMapN, strategyN } from './intervalS
 
 describe('merge', () => {
     it('empty', () => {
-        const a: IntervalSequence = { first: 'first', rest: undefined }
-        const b: IntervalSequence = { first: 'second', rest: undefined }
+        const a: IntervalSequence = { value: 'first', edge: () => undefined }
+        const b: IntervalSequence = { first: 'second', edge: () => undefined }
         const r = intervalSequence.merge(strategy)(a)(b)
         expect(r)
             .toStrictEqual({ first: 'first.second', rest: undefined })
