@@ -86,4 +86,23 @@ describe('merge', () => {
                 { edge: 30, value: 4 },
             ])
     })
+    it('dedup2', () => {
+        const a: IntervalMapN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1}
+            ])
+        }
+        const b: IntervalMapN = {
+            first: 1,
+            rest: sequence.fromArray([
+                { edge: 0, value: 0 }
+            ])
+        }
+        const r = intervalSequence.merge(strategyN)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(r.rest)
+            .toBeUndefined()
+    })
 })
