@@ -4,7 +4,7 @@ import * as intervalSequence from '../intervalSequence'
 
 export type IntervalSequence = intervalSequence.IntervalSequence<number, string>
 
-export type IntervalLeft = intervalSequence.IntervalLeft<number, string>
+// export type IntervalLeft = intervalSequence.IntervalLeft<number, string>
 
 export type MergeStrategy = intervalSequence.MergeStrategy<number, string, string, string>
 

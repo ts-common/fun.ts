@@ -1,4 +1,4 @@
-import * as sequence from './sequence'
+// import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
 
@@ -40,35 +40,55 @@ export const merge
         type A = S[1]
         type B = S[2]
         type R = S[3]
-        const createEdge
-            : (_: E) => (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => () => Edge<E, R>
-            = value => a => b => () => ({ value, interval: main(a)(b) })
+        type ASequence = IntervalSequence<E, A>
+        type BSequence = IntervalSequence<E, B>
+        type RSequence = IntervalSequence<E, R>
         const edge
-            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => () => Edge<E, R> | undefined
+            : (_: ASequence) => (_: BSequence) => () => Edge<E, R> | undefined
             = a => b => {
                 const aEdge = a.edge()
                 const bEdge = b.edge()
+                const nextA
+                    : (_: Edge<E, A>) => () => Edge<E, R>
+                    = ({ value, interval }) => () => ({ value, interval: main(interval)(b) })
+                const nextB
+                    : (_: Edge<E, B>) => () => Edge<E, R>
+                    = e => () => ({ value: e.value, interval: main(a)(e.interval) })
                 if (aEdge === undefined) {
                     if (bEdge === undefined) {
                         return () => undefined
                     }
-                    return createEdge(bEdge.value)(a)(bEdge.interval)
+                    return nextB(bEdge)
                 }
                 if (bEdge === undefined) {
-                    return createEdge(aEdge.value)(aEdge.interval)(b)
+                    return nextA(aEdge)
                 }
                 switch (strategy.intervalSequence.sign(aEdge.value)(bEdge.value)) {
                     case -1:
-                        return createEdge(aEdge.value)(aEdge.interval)(b)
+                        return nextA(aEdge)
                     case 1:
-                        return createEdge(bEdge.value)(a)(bEdge.interval)
+                        return nextB(bEdge)
+                    case 0:
                     default:
-                        return createEdge(aEdge.value)(aEdge.interval)(bEdge.interval)
+                        return () => ({ value: aEdge.value, interval: main(aEdge.interval)(bEdge.interval) })
                 }
             }
         const main
-            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
+            : (_: ASequence) => (_: BSequence) => IntervalSequence<E, R>
             = a => b => ({ value: strategy.reduce(a.value)(b.value), edge: edge(a)(b) })
+        const dedup
+            : (_: RSequence) => RSequence
+            = r => {
+                const e = r.edge()
+                if (e === undefined) {
+                    return r
+                }
+                const { value } = r
+                const { interval } = e
+                return strategy.intervalSequence.equal(value)(interval.value)
+                    ? dedup({ value, edge: interval.edge })
+                    : { value, edge: () => ({ value: e.value, interval: dedup(interval) }) }
+            }
         return main
     }
 
