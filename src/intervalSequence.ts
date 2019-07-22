@@ -2,6 +2,77 @@ import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
 
+export type IntervalSequence<E, T> = {
+    readonly value: T
+    readonly edge: () => Edge<E, T> | undefined
+}
+
+export type Edge<E, T> = {
+    readonly value: E
+    readonly interval: IntervalSequence<E, T>
+}
+
+export type Strategy<E, T> = {
+    readonly sign: sign.Compare<E>
+    readonly equal: equal.Equal<T>
+}
+
+export type Reduce<A, B, R> = (_: A) => (_: B) => R
+
+export type MergeStrategy<E, A, B, R> = {
+    readonly intervalSequence: Strategy<E, R>
+    readonly reduce: Reduce<A, B, R>
+}
+
+export type Merge
+    = <E, A, B, R>(_: MergeStrategy<E, A, B, R>)
+    => (_: IntervalSequence<E, A>)
+    => (_: IntervalSequence<E, B>)
+    => IntervalSequence<E, R>
+
+export const merge
+    : Merge
+    = strategy => {
+        type S = typeof strategy extends MergeStrategy<infer _E, infer _A, infer _B, infer _R>
+            ? readonly [_E, _A, _B, _R]
+            : never
+        type E = S[0]
+        type A = S[1]
+        type B = S[2]
+        type R = S[3]
+        const createEdge
+            : (_: E) => (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => () => Edge<E, R>
+            = value => a => b => () => ({ value, interval: main(a)(b) })
+        const edge
+            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => () => Edge<E, R> | undefined
+            = a => b => {
+                const aEdge = a.edge()
+                const bEdge = b.edge()
+                if (aEdge === undefined) {
+                    if (bEdge === undefined) {
+                        return () => undefined
+                    }
+                    return createEdge(bEdge.value)(a)(bEdge.interval)
+                }
+                if (bEdge === undefined) {
+                    return createEdge(aEdge.value)(aEdge.interval)(b)
+                }
+                switch (strategy.intervalSequence.sign(aEdge.value)(bEdge.value)) {
+                    case -1:
+                        return createEdge(aEdge.value)(aEdge.interval)(b)
+                    case 1:
+                        return createEdge(bEdge.value)(a)(bEdge.interval)
+                    default:
+                        return createEdge(aEdge.value)(aEdge.interval)(bEdge.interval)
+                }
+            }
+        const main
+            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
+            = a => b => ({ value: strategy.reduce(a.value)(b.value), edge: edge(a)(b) })
+        return main
+    }
+
+/*
 // [edge, +Infinity)
 export type IntervalLeft<E, T> = {
     readonly edge: E
@@ -17,6 +88,8 @@ export type Strategy<E, T> = {
     readonly sign: sign.Compare<E>
     readonly equal: equal.Equal<T>
 }
+
+export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type MergeStrategy<E, A, B, R> = {
     readonly intervalSequence: Strategy<E, R>
@@ -37,8 +110,6 @@ const drop
         },
         edge: value.edge
     })
-
-export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge
     = <E, A, B, R>(_: MergeStrategy<E, A, B, R>)
@@ -65,7 +136,7 @@ export const merge
         const next
             : (_: E) => (_: Pair<E, A, B>) => sequence.NonEmptySequence<IntervalLeft<E, R>>
             = edge => p => ({
-                value: { value: reduce(p.a.first)(p.b.first), edge },
+                value: { edge, value: reduce(p.a.first)(p.b.first) },
                 next: () => listMerge(p)
             })
         const listMerge
@@ -108,15 +179,9 @@ export const merge
         const dedupEqual
             : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
             = a => b => intervalSequence.equal(a.value)(b.value)
-        const result
-            : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
-            = a => b => {
-                const first = reduce(a.first)(b.first)
-                const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
-                return {
-                    first,
-                    rest,
-                }
-            }
-        return result
+        return a => b => ({
+            first: reduce(a.first)(b.first),
+            rest: sequence.dedup(dedupEqual)(listMerge({ a, b }),
+        })
     }
+*/
