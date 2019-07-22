@@ -80,7 +80,6 @@ describe('merge', () => {
             .toBe(0)
         expect(sequence.toArray(r.rest))
             .toStrictEqual([
-                { edge: 0, value: 0 },
                 { edge: 12, value: 1 },
                 { edge: 24, value: 3 },
                 { edge: 30, value: 4 },

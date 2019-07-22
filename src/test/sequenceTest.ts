@@ -173,3 +173,31 @@ describe('size', () => {
             .toBe(5)
     })
 })
+
+describe('dropWhile', () => {
+    it('empty', () => {
+        const lessThanTwo
+            : predicate.Predicate<number>
+            = p => p < 2
+        const result = sequence.dropWhile(lessThanTwo)(undefined)
+        expect(result)
+            .toBeUndefined()
+    })
+    it('> 5', () => {
+        const lessThanFive
+            : predicate.Predicate<number>
+            = p => p < 5
+        const result = sequence.dropWhile(lessThanFive)(sequence.fromArray([0, 1, 2, 3, 4]))
+        expect(result)
+            .toBeUndefined()
+    })
+    it('< 2', () => {
+        const lessThanTwo
+            : predicate.Predicate<number>
+            = p => p < 2
+        const result = sequence.toArray(
+            sequence.dropWhile(lessThanTwo)(sequence.fromArray([0, 1, 2, 3, 4])))
+        expect(result)
+            .toStrictEqual([2, 3, 4])
+    })
+})
