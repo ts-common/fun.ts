@@ -80,10 +80,28 @@ describe('merge', () => {
             .toBe(0)
         expect(sequence.toArray(r.rest))
             .toStrictEqual([
-                { edge: 0, value: 0 },
                 { edge: 12, value: 1 },
                 { edge: 24, value: 3 },
                 { edge: 30, value: 4 },
             ])
+    })
+    it('dedup2', () => {
+        const a: IntervalMapN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1}
+            ])
+        }
+        const b: IntervalMapN = {
+            first: 1,
+            rest: sequence.fromArray([
+                { edge: 0, value: 0 }
+            ])
+        }
+        const r = intervalSequence.merge(strategyN)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(r.rest)
+            .toBeUndefined()
     })
 })

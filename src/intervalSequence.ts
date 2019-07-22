@@ -1,6 +1,7 @@
 import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
+import * as predicate from './predicate'
 
 // [edge, +Infinity)
 export type IntervalLeft<E, T> = {
@@ -113,9 +114,17 @@ export const merge
             = a => b => {
                 const first = reduce(a.first)(b.first)
                 const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
+
+                // need to drop initial intervals that are the same value as the first
+                const isSameAsFisrt
+                    : predicate.Predicate<IntervalLeft<E, R>>
+                    = p => intervalSequence.equal(p.value)(first)
+
+                const uniqueRest = sequence.dropWhile(isSameAsFisrt)(rest)
+
                 return {
                     first,
-                    rest,
+                    rest: uniqueRest,
                 }
             }
         return result
