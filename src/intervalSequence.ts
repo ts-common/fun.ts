@@ -1,10 +1,18 @@
 import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
+import * as predicate from './predicate'
 
 // [edge, +Infinity)
 export type IntervalLeft<E, T> = {
     readonly edge: E
+    readonly value: T
+}
+
+// [min, max)
+export type Interval<E, T> = {
+    readonly min: E
+    readonly max: E
     readonly value: T
 }
 
@@ -16,11 +24,6 @@ export type IntervalSequence<E, T> = {
 export type Strategy<E, T> = {
     readonly sign: sign.Compare<E>
     readonly equal: equal.Equal<T>
-}
-
-export type MergeStrategy<E, A, B, R> = {
-    readonly intervalSequence: Strategy<E, R>
-    readonly reduce: Reduce<A, B, R>
 }
 
 type DropResult<E, T> = {
@@ -41,7 +44,8 @@ const drop
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge
-    = <E, A, B, R>(_: MergeStrategy<E, A, B, R>)
+    = <E, R>(_: Strategy<E, R>)
+    => <A, B>(_: Reduce<A, B, R>)
     => (_: IntervalSequence<E, A>)
     => (_: IntervalSequence<E, B>)
     => IntervalSequence<E, R>
@@ -53,8 +57,8 @@ type Pair<E, A, B> = {
 
 export const merge
     : Merge
-    = ({ intervalSequence, reduce }) => {
-        type S = typeof intervalSequence extends Strategy<infer _E, infer _R>
+    = strategy => reduce => {
+        type S = typeof strategy extends Strategy<infer _E, infer _R>
             ? readonly [_E, _R]
             : never
         type E = S[0]
@@ -86,7 +90,7 @@ export const merge
                 }
                 const aEdge = aRest.value.edge
                 const bEdge = bRest.value.edge
-                switch (intervalSequence.sign(aEdge)(bEdge)) {
+                switch (strategy.sign(aEdge)(bEdge)) {
                     // If aEdge < bEdge
                     case -1: {
                         const { map, edge } = drop(aRest)
@@ -107,16 +111,57 @@ export const merge
             }
         const dedupEqual
             : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
-            = a => b => intervalSequence.equal(a.value)(b.value)
+            = a => b => strategy.equal(a.value)(b.value)
         const result
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => {
                 const first = reduce(a.first)(b.first)
                 const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
+
+                // need to drop initial intervals that are the same value as the first
+                const isSameAsFisrt
+                    : predicate.Predicate<IntervalLeft<E, R>>
+                    = p => strategy.equal(p.value)(first)
+
+                const uniqueRest = sequence.dropWhile(isSameAsFisrt)(rest)
+
                 return {
                     first,
-                    rest,
+                    rest: uniqueRest,
                 }
             }
+        return result
+    }
+
+export type Add
+    =  <E, A>(_: Strategy<E, A>)
+    => (_: IntervalSequence<E, A>)
+    => (_: Interval<E, A | undefined>)
+    => IntervalSequence<E, A>
+
+export const add
+    : Add
+    = strategy => current => toAdd => {
+        type EA = typeof current extends IntervalSequence<infer _E, infer _A>
+            ? readonly [_E, _A] : never
+        type E = EA[0]
+        type A = EA[1]
+
+        const mergeSeq: IntervalSequence<E, A | undefined> = {
+            first: undefined,
+            rest: sequence.fromArray([
+                { edge: toAdd.min, value: toAdd.value },
+                { edge: toAdd.max, value: undefined }
+            ])
+        }
+
+        const reduce
+            : (_: A) => (_: A | undefined) => A
+            = a => b => b === undefined ? a : b
+
+        const result
+            : IntervalSequence<E, A>
+            = merge<E, A>(strategy)<A, A | undefined>(reduce)(current)(mergeSeq)
+
         return result
     }

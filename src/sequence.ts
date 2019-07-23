@@ -67,6 +67,22 @@ export const scanFilter
         return state.value ? { value, next: nextState } : nextState()
     })
 
+/**
+ * Return a Sequence<T> with initial elements matching the predicate removed
+ */
+export const dropWhile
+    : <T>(_: predicate.Predicate<T>) => (_: Sequence<T>) => Sequence<T>
+    = p => {
+        type T = typeof p extends predicate.Predicate<infer _T> ? _T : never
+        const result
+            : (_: Sequence<T>) => Sequence<T>
+            = optional.map(({ value, next }) => {
+                const dropNext = () => result(next())
+                return p(value) ? dropNext() : { value, next }
+            })
+        return result
+    }
+
 export const filter
     : <T>(_: predicate.Predicate<T>) => (_: Sequence<T>) => Sequence<T>
     = p => {
