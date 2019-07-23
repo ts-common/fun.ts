@@ -1,6 +1,7 @@
 // tslint:disable:no-expression-statement
 import * as intervalSequence from '../intervalSequence'
 import * as sequence from '../sequence'
+import * as isTestStrat from './intervalSequenceStrategy'
 import { IntervalSequence, merge, IntervalMapN, mergeN } from './intervalSequenceStrategy'
 
 describe('merge', () => {
@@ -87,5 +88,63 @@ describe('merge', () => {
             .toBe(0)
         expect(r.next())
             .toBeUndefined()
+    })
+})
+
+describe('add', () => {
+    it('add', () => {
+        const a: isTestStrat.IntervalSequenceyN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 }
+            ])
+        }
+        const b: intervalSequence.Interval<number, number> = {
+            min: 1,
+            max: 2,
+            value: 15,
+        }
+        const r =
+            intervalSequence.add
+                <number, number>
+                (isTestStrat.strategyN)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(sequence.toArray(r.rest))
+            .toStrictEqual([
+                { edge: 0, value: 1},
+                { edge: 1, value: 15},
+                { edge: 2, value: 1},
+                { edge: 5, value: 2 }
+            ])
+    })
+    it('addEnd', () => {
+        const a: isTestStrat.IntervalSequenceyN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 }
+            ])
+        }
+        const b: intervalSequence.Interval<number, number> = {
+            min: 6,
+            max: 10,
+            value: 15,
+        }
+        const r =
+            intervalSequence.add
+                <number, number>
+                (isTestStrat.strategyN)(a)(b)
+
+        expect(r.first)
+            .toBe(0)
+        expect(sequence.toArray(r.rest))
+            .toStrictEqual([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 },
+                { edge: 6, value: 15 },
+                { edge: 10, value: 2 }
+            ])
     })
 })

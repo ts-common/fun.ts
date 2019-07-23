@@ -8,6 +8,13 @@ export type IntervalLeft<E, T> = {
     readonly value: T
 }
 
+// [min, max)
+export type Interval<E, T> = {
+    readonly min: E
+    readonly max: E
+    readonly value: T
+}
+
 export type IntervalLeftSequence<E, T> = sequence.Sequence<IntervalLeft<E, T>>
 
 export type First<T> = {
@@ -99,5 +106,53 @@ export const merge
                 const { value, next } = main(a)(b)
                 return { value, next: () => sequence.dedup(dedupEqual)(sequence.dropWhile(dedupEqual(value))(next())) }
             }
+                const first = reduce(a.first)(b.first)
+                const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
+
+                // need to drop initial intervals that are the same value as the first
+                const isSameAsFisrt
+                    : predicate.Predicate<IntervalLeft<E, R>>
+                    = p => strategy.equal(p.value)(first)
+
+                const uniqueRest = sequence.dropWhile(isSameAsFisrt)(rest)
+
+                return {
+                    first,
+                    rest: uniqueRest,
+                }
+            }
+        return result
+    }
+
+export type Add
+    =  <E, A>(_: Strategy<E, A>)
+    => (_: IntervalSequence<E, A>)
+    => (_: Interval<E, A | undefined>)
+    => IntervalSequence<E, A>
+
+export const add
+    : Add
+    = strategy => current => toAdd => {
+        type EA = typeof current extends IntervalSequence<infer _E, infer _A>
+            ? readonly [_E, _A] : never
+        type E = EA[0]
+        type A = EA[1]
+
+        const mergeSeq: IntervalSequence<E, A | undefined> = {
+            first: undefined,
+            rest: sequence.fromArray([
+                { edge: toAdd.min, value: toAdd.value },
+                { edge: toAdd.max, value: undefined }
+            ])
+        }
+
+        const reduce
+            : (_: A) => (_: A | undefined) => A
+            = a => b => b === undefined ? a : b
+
+        const result
+            : IntervalSequence<E, A>
+            = merge<E, A>(strategy)<A, A | undefined>(reduce)(current)(mergeSeq)
+
         return result
     }

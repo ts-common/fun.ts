@@ -2,38 +2,40 @@ import * as sign from '../sign'
 import * as equal from '../equal'
 import * as intervalSequence from '../intervalSequence'
 
-export type IntervalSequence = intervalSequence.IntervalSequence<number, string>
+export type IntervalSequenceS = intervalSequence.IntervalSequence<number, string>
 
-export type IntervalLeft = intervalSequence.IntervalLeft<number, string>
+export type IntervalLeftS = intervalSequence.IntervalLeft<number, string>
 
-export type Strategy = intervalSequence.Strategy<number, string>
+export type ReduceS = intervalSequence.Reduce<string, string, string>
 
-export type Reduce = intervalSequence.Reduce<string, string, string>
+export type StrategyS = intervalSequence.Strategy<number, string>
 
-export const strategy
-    : Strategy
-    = {
-       sign: sign.numberCompare,
-       equal: equal.strictEqual,
-    }
-
-export const reduce
-    : Reduce
+export const reduceS
+    : ReduceS
     = a => b => `${a}.${b}`
 
-export const merge = intervalSequence.merge(strategy)(reduce)
+export const strategyS
+    : StrategyS
+    = {
+        sign: sign.numberCompare,
+        equal: equal.strictEqual,
+    }
 
-export type IntervalMapN = intervalSequence.IntervalSequence<number, number>
+export const mergeS = intervalSequence.merge(strategyS)(reduceS)
+
+export type IntervalSequenceyN = intervalSequence.IntervalSequence<number, number>
 
 export type StrategyN = intervalSequence.Strategy<number, number>
+
+export type ReduceN = intervalSequence.Reduce<number, number, number>
 
 export type ReduceN = intervalSequence.Reduce<number, number, number>
 
 export const strategyN
     : StrategyN
     = {
-       sign: sign.numberCompare,
-       equal: equal.strictEqual,
+        sign: sign.numberCompare,
+        equal: equal.strictEqual,
     }
 
 export const reduceN

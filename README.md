@@ -127,6 +127,7 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 - https://en.wikipedia.org/wiki/Type_class
 - https://en.wikipedia.org/wiki/Structural_type_system
 - https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/
+- http://dippl.org/chapters/02-webppl.html
 
 ## ECMAScript Proposals
 
