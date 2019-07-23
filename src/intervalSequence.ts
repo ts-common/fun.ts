@@ -22,15 +22,15 @@ export type First<T> = {
 }
 
 export type IntervalSequence<E, T> = {
-    readonly value: First<T>
-    readonly next: () => IntervalLeftSequence<E, T>
+    readonly first: First<T>
+    readonly rest: () => IntervalLeftSequence<E, T>
 }
 
 export const fromArray
     : <T>(_: T) => <E>(_: readonly IntervalLeft<E, T>[]) => IntervalSequence<E, T>
     = value => next => ({
-        value: { value },
-        next: () => sequence.fromArray(next)
+        first: { value },
+        rest: () => sequence.fromArray(next)
     })
 
 export type Strategy<E, T> = {
@@ -42,10 +42,10 @@ export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge
     = <E, R>(_: Strategy<E, R>)
-    => <A, B>(_: Reduce<A, B, R>)
-    => (_: IntervalSequence<E, A>)
-    => (_: IntervalSequence<E, B>)
-    => IntervalSequence<E, R>
+        => <A, B>(_: Reduce<A, B, R>)
+            => (_: IntervalSequence<E, A>)
+                => (_: IntervalSequence<E, B>)
+                    => IntervalSequence<E, R>
 
 export const merge
     : Merge
@@ -59,25 +59,25 @@ export const merge
         const intervalLeftSequence
             : (_: E)
                 => (_: IntervalSequence<E, A>)
-                => (_: IntervalSequence<E, B>)
-                => IntervalLeftSequence<E, R>
+                    => (_: IntervalSequence<E, B>)
+                        => IntervalLeftSequence<E, R>
             = edge => a => b => {
-                const { value, next } = main(a)(b)
-                return { value: { edge, value: value.value }, next }
+                const { first, rest } = main(a)(b)
+                return { first: { edge, value: first.value }, rest }
             }
         const main
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => ({
-                value: { value: reduce(a.value.value)(b.value.value) },
-                next: () => {
-                    const aNext = a.next()
-                    const bNext = b.next()
+                first: { value: reduce(a.first.value)(b.first.value) },
+                rest: () => {
+                    const aNext = a.rest()
+                    const bNext = b.rest()
                     const aShift
                         : (_: sequence.NonEmptySequence<IntervalLeft<E, A>>) => IntervalLeftSequence<E, R>
-                        = n => intervalLeftSequence(n.value.edge)(n)(b)
+                        = n => intervalLeftSequence(n.first.edge)(n)(b)
                     const bShift
                         : (_: sequence.NonEmptySequence<IntervalLeft<E, B>>) => IntervalLeftSequence<E, R>
-                        = n => intervalLeftSequence(n.value.edge)(a)(n)
+                        = n => intervalLeftSequence(n.first.edge)(a)(n)
                     if (aNext === undefined) {
                         if (bNext === undefined) {
                             return undefined
@@ -87,13 +87,13 @@ export const merge
                     if (bNext === undefined) {
                         return aShift(aNext)
                     }
-                    switch (strategy.sign(aNext.value.edge)(bNext.value.edge)) {
+                    switch (strategy.sign(aNext.first.edge)(bNext.first.edge)) {
                         case -1:
                             return aShift(aNext)
                         case 1:
                             return bShift(bNext)
                         default:
-                            return intervalLeftSequence(aNext.value.edge)(aNext)(bNext)
+                            return intervalLeftSequence(aNext.first.edge)(aNext)(bNext)
                     }
                 }
             })
@@ -103,17 +103,17 @@ export const merge
         const result
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => {
-                const { value, next } = main(a)(b)
-                return { value, next: () => sequence.dedup(dedupEqual)(sequence.dropWhile(dedupEqual(value))(next())) }
+                const { first, rest } = main(a)(b)
+                return { first, rest: () => sequence.dedup(dedupEqual)(sequence.dropWhile(dedupEqual(first))(rest())) }
             }
         return result
     }
 
 export type Add
-    =  <E, A>(_: Strategy<E, A>)
-    => (_: IntervalSequence<E, A>)
-    => (_: Interval<E, A | undefined>)
-    => IntervalSequence<E, A>
+    = <E, A>(_: Strategy<E, A>)
+        => (_: IntervalSequence<E, A>)
+            => (_: Interval<E, A | undefined>)
+                => IntervalSequence<E, A>
 
 export const add
     : Add
@@ -124,8 +124,8 @@ export const add
         type A = EA[1]
 
         const mergeSeq: IntervalSequence<E, A | undefined> = {
-            value: { value: undefined },
-            next: () => sequence.fromArray([
+            first: { value: undefined },
+            rest: () => sequence.fromArray([
                 { edge: toAdd.min, value: toAdd.value },
                 { edge: toAdd.max, value: undefined }
             ])
