@@ -42,10 +42,10 @@ export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge
     = <E, R>(_: Strategy<E, R>)
-        => <A, B>(_: Reduce<A, B, R>)
-            => (_: IntervalSequence<E, A>)
-                => (_: IntervalSequence<E, B>)
-                    => IntervalSequence<E, R>
+    => <A, B>(_: Reduce<A, B, R>)
+    => (_: IntervalSequence<E, A>)
+    => (_: IntervalSequence<E, B>)
+    => IntervalSequence<E, R>
 
 export const merge
     : Merge
@@ -59,8 +59,8 @@ export const merge
         const intervalLeftSequence
             : (_: E)
                 => (_: IntervalSequence<E, A>)
-                    => (_: IntervalSequence<E, B>)
-                        => IntervalLeftSequence<E, R>
+                => (_: IntervalSequence<E, B>)
+                => IntervalLeftSequence<E, R>
             = edge => a => b => {
                 const { first, rest } = main(a)(b)
                 return { first: { edge, value: first.value }, rest }
@@ -111,9 +111,9 @@ export const merge
 
 export type Add
     = <E, A>(_: Strategy<E, A>)
-        => (_: IntervalSequence<E, A>)
-            => (_: Interval<E, A | undefined>)
-                => IntervalSequence<E, A>
+    => (_: IntervalSequence<E, A>)
+    => (_: Interval<E, A | undefined>)
+    => IntervalSequence<E, A>
 
 export const add
     : Add
