@@ -130,9 +130,9 @@ describe('merge', () => {
     })
 })
 
-describe('merge', () => {
+describe('add', () => {
     it('add', () => {
-        const a: IntervalMapN = {
+        const a: isTestStrat.IntervalSequenceyN = {
             first: 0,
             rest: sequence.fromArray([
                 { edge: 0, value: 1},
@@ -144,7 +144,10 @@ describe('merge', () => {
             max: 2,
             value: 15,
         }
-        const r = intervalSequence.add(strategyN.intervalSequence)(a)(b)
+        const r =
+            intervalSequence.add
+                <number, number>
+                (isTestStrat.strategyN)(a)(b)
         expect(r.first)
             .toBe(0)
         expect(sequence.toArray(r.rest))
@@ -156,7 +159,7 @@ describe('merge', () => {
             ])
     })
     it('addEnd', () => {
-        const a: IntervalMapN = {
+        const a: isTestStrat.IntervalSequenceyN = {
             first: 0,
             rest: sequence.fromArray([
                 { edge: 0, value: 1},
@@ -168,7 +171,11 @@ describe('merge', () => {
             max: 10,
             value: 15,
         }
-        const r = intervalSequence.add(strategyN.intervalSequence)(a)(b)
+        const r =
+            intervalSequence.add
+                <number, number>
+                (isTestStrat.strategyN)(a)(b)
+
         expect(r.first)
             .toBe(0)
         expect(sequence.toArray(r.rest))
