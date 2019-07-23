@@ -7,6 +7,12 @@ export type IntervalSequence<E, T> = {
     readonly edge: () => Edge<E, T> | undefined
 }
 
+// [edge, +Infinity) => value
+export type IntervalLeft<E, T> = {
+    readonly edge: E
+    readonly value: T
+}
+
 export type Edge<E, T> = {
     readonly value: E
     readonly interval: IntervalSequence<E, T>
