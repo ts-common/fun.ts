@@ -17,7 +17,7 @@ export const reduceS
 export const strategyS
     : StrategyS
     = {
-        sign: sign.numberCompare,
+        compare: sign.numberCompare,
         equal: equal.strictEqual,
     }
 
@@ -32,7 +32,7 @@ export type ReduceN = intervalSequence.Reduce<number, number, number>
 export const strategyN
     : StrategyN
     = {
-        sign: sign.numberCompare,
+        compare: sign.numberCompare,
         equal: equal.strictEqual,
     }
 

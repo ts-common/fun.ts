@@ -34,7 +34,7 @@ export const fromArray
     })
 
 export type Strategy<E, T> = {
-    readonly sign: sign.Compare<E>
+    readonly compare: sign.Compare<E>
     readonly equal: equal.Equal<T>
 }
 
@@ -87,7 +87,7 @@ export const merge
                     if (bRest === undefined) {
                         return aShift(aRest)
                     }
-                    switch (strategy.sign(aRest.first.min)(bRest.first.min)) {
+                    switch (strategy.compare(aRest.first.min)(bRest.first.min)) {
                         case -1:
                             return aShift(aRest)
                         case 1:
