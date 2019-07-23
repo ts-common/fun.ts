@@ -3,9 +3,11 @@ import * as equal from './equal'
 import * as optional from './optional'
 import * as predicate from './predicate'
 
+export type LazySequence<T> = () => Sequence<T>
+
 export type NonEmptySequence<T> = {
-    readonly value: T
-    readonly next: () => Sequence<T>
+    readonly first: T
+    readonly rest: LazySequence<T>
 }
 
 export type Sequence<T> = NonEmptySequence<T> | undefined
@@ -16,7 +18,7 @@ export const fromArray
         type T = meta.ArrayItem<typeof array>
         const next
             : (_: number) => Sequence<T>
-            = i => i < array.length ? ({ value: array[i], next: () => next(i + 1) }) : undefined
+            = i => i < array.length ? ({ first: array[i], rest: () => next(i + 1) }) : undefined
         return next(0)
     }
 
@@ -46,13 +48,13 @@ export const accumulator
 
 export const inclusiveScan
     : <T, R>(_: NextState<T, R>) => (_: Sequence<T>) => Sequence<R>
-    = nextState => optional.map(({ value, next }) => exclusiveScan(nextState(value))(next()))
+    = nextState => optional.map(({ first, rest }) => exclusiveScan(nextState(first))(rest()))
 
 export const exclusiveScan
     : <T, R>(_: State<T, R>) => (_: Sequence<T>) => NonEmptySequence<R>
     = ({ value, next }) => sequence => ({
-        value,
-        next: () => inclusiveScan(next)(sequence)
+        first: value,
+        rest: () => inclusiveScan(next)(sequence)
     })
 
 export type FilterState<T> = State<T, boolean>
@@ -61,10 +63,10 @@ export type NextFilterState<T> = NextState<T, boolean>
 
 export const scanFilter
     : <T>(_: NextFilterState<T>) => (_: Sequence<T>) => Sequence<T>
-    = nextFilterState => optional.map(({ value, next }) => {
-        const state = nextFilterState(value)
-        const nextState = () => scanFilter(state.next)(next())
-        return state.value ? { value, next: nextState } : nextState()
+    = nextFilterState => optional.map(({ first, rest }) => {
+        const { value, next } = nextFilterState(first)
+        const nextState = () => scanFilter(next)(rest())
+        return value ? { first, rest: nextState } : nextState()
     })
 
 /**
@@ -76,9 +78,9 @@ export const dropWhile
         type T = typeof p extends predicate.Predicate<infer _T> ? _T : never
         const result
             : (_: Sequence<T>) => Sequence<T>
-            = optional.map(({ value, next }) => {
-                const dropNext = () => result(next())
-                return p(value) ? dropNext() : { value, next }
+            = optional.map(({ first, rest }) => {
+                const dropNext = () => result(rest())
+                return p(first) ? dropNext() : { first, rest }
             })
         return result
     }
@@ -89,9 +91,9 @@ export const filter
         type T = typeof p extends predicate.Predicate<infer _T> ? _T : never
         const result
             : (_: Sequence<T>) => Sequence<T>
-            = optional.map(({ value, next }) => {
-                const filterNext = () => result(next())
-                return p(value) ? { value, next: filterNext } : filterNext()
+            = optional.map(({ first, rest }) => {
+                const filterNext = () => result(rest())
+                return p(first) ? { first, rest: filterNext } : filterNext()
             })
         return result
     }
@@ -118,18 +120,18 @@ export const dedup
 
 export const flatten
     : <T>(_: Sequence<Sequence<T>>) => Sequence<T>
-    = optional.map(({ value, next }) => concatFront(() => flatten(next()))(value))
+    = optional.map(({ first, rest }) => concatFront(() => flatten(rest()))(first))
 
 export const infinite
     : NonEmptySequence<undefined>
     = ({
-        value: undefined,
-        next: () => infinite
+        first: undefined,
+        rest: () => infinite
     })
 
 export const take
     : (_: number) => <T>(_: Sequence<T>) => Sequence<T>
-    = n => optional.map(({ value, next }) => n <= 0 ? undefined : ({ value, next: () => take(n - 1)(next()) }))
+    = n => optional.map(({ first, rest }) => n <= 0 ? undefined : ({ first, rest: () => take(n - 1)(rest()) }))
 
 export type Entry<T> = readonly [number, T]
 
@@ -152,20 +154,20 @@ export const map
         type R = TR[1]
         const result
             : (_: Sequence<T>) => Sequence<R>
-            = optional.map(({ value, next }) => ({
-                value: f(value),
-                next: () => result(next())
+            = optional.map(({ first, rest }) => ({
+                first: f(first),
+                rest: () => result(rest())
             }))
         return result
     }
 
 export const last
     : <T>(_: NonEmptySequence<T>) => T
-    = ({ value, next }) => {
-        const nextSequence = next()
+    = ({ first, rest }) => {
+        const restSequence = rest()
         // Hopefully, last() is PTC (proper tail call).
         // Link: https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/
-        return nextSequence === undefined ? value : last(nextSequence)
+        return restSequence === undefined ? first : last(restSequence)
     }
 
 export const exclusiveFold
@@ -182,29 +184,24 @@ export const toArray
         (accumulator(push)<typeof sequence extends Sequence<infer I> ? I : never>([]))
         (sequence)
 
-type ReverseTail<T> = {
-    readonly sequence: Sequence<T>
-    readonly tail: Sequence<T>
-}
-
 const reverseTail
-    : <T>(_: ReverseTail<T>) => Sequence<T>
-    = ({ sequence, tail }) => sequence === undefined
+    : <T>(_: Sequence<T>) => (_: Sequence<T>) => Sequence<T>
+    = tail => sequence => sequence === undefined
         ? tail
         // Tail recursion
-        : reverseTail({ sequence: sequence.next(), tail: { value: sequence.value, next: () => tail } })
+        : reverseTail({ first: sequence.first, rest: () => tail })(sequence.rest())
 
 export const reverse
     : <T>(_: Sequence<T>) => Sequence<T>
-    = sequence => reverseTail({ sequence, tail: undefined })
+    = reverseTail(undefined)
 
 const concatFront
-    : <T>(_: () => Sequence<T>) => (_: Sequence<T>) => Sequence<T>
+    : <T>(_: LazySequence<T>) => (_: Sequence<T>) => Sequence<T>
     = b => {
         type S = typeof b extends () => (infer U) ? U : never
         const f
             : (_: S) => S
-            = a => a === undefined ? b() : { value: a.value, next: () => f(a.next()) }
+            = a => a === undefined ? b() : { first: a.first, rest: () => f(a.rest()) }
         return f
     }
 
@@ -212,15 +209,10 @@ export const concat
     : <T>(_: Sequence<T>) => (_: Sequence<T>) => Sequence<T>
     = a => b => concatFront(() => b)(a)
 
-type SizeState<T> = {
-    readonly value: number
-    readonly rest: Sequence<T>
-}
-
 const foldSizeState
-    : <T>(_: SizeState<T>) => number
-    = ({ value, rest }) => rest === undefined ? value : foldSizeState({ value: value + 1, rest: rest.next() })
+    : (_: number) => <T>(_: Sequence<T>) => number
+    = value => sequence => sequence === undefined ? value : foldSizeState(value + 1)(sequence.rest())
 
 export const size
     : <T>(_: Sequence<T>) => number
-    = rest => foldSizeState({ value: 0, rest })
+    = foldSizeState(0)
