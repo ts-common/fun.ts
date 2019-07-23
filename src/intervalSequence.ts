@@ -9,12 +9,10 @@ export type IntervalLeft<E, T> = {
     readonly value: T
 }
 
-export type IntervalSequence<E, T> = {
-    readonly first: T
-    readonly rest: sequence.Sequence<IntervalLeft<E, T>>
-}
+export type IntervalSequence<E, T> = sequence.NonEmptySequence<IntervalLeft<E, T>>
 
 export type Strategy<E, T> = {
+    readonly min: E
     readonly sign: sign.Compare<E>
     readonly equal: equal.Equal<T>
 }
@@ -24,11 +22,14 @@ export type MergeStrategy<E, A, B, R> = {
     readonly reduce: Reduce<A, B, R>
 }
 
+/*
 type DropResult<E, T> = {
     readonly map: IntervalSequence<E, T>
     readonly edge: E
 }
+*/
 
+/*
 const drop
     : <E, T>(list: sequence.NonEmptySequence<IntervalLeft<E, T>>) => DropResult<E, T>
     = ({ value, next }) => ({
@@ -38,6 +39,7 @@ const drop
         },
         edge: value.edge
     })
+    */
 
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
@@ -47,11 +49,53 @@ export type Merge
     => (_: IntervalSequence<E, B>)
     => IntervalSequence<E, R>
 
-type Pair<E, A, B> = {
-    readonly a: IntervalSequence<E, A>
-    readonly b: IntervalSequence<E, B>
-}
+export const merge
+    : Merge
+    = strategy => {
+        type Types = typeof strategy extends MergeStrategy<infer _E, infer _A, infer _B, infer _R>
+            ? readonly [_E, _A, _B, _R]
+            : never
+        type E = Types[0]
+        type A = Types[1]
+        type B = Types[2]
+        type R = Types[3]
+        type IntervalSequenceA = IntervalSequence<E, A>
+        type IntervalSequenceB = IntervalSequence<E, B>
+        type IntervalSequenceR = IntervalSequence<E, R>
+        const main
+            : (_: E) => (_: IntervalSequenceA) => (_: IntervalSequenceB) => IntervalSequenceR
+            = edge => a => b => ({
+                value: { edge, value: strategy.reduce(a.value.value)(b.value.value) },
+                next: () => {
+                    const aNext = a.next()
+                    const bNext = b.next()
+                    if (aNext === undefined) {
+                        if (bNext === undefined) {
+                            return undefined
+                        }
+                        return main(bNext.value.edge)(a)(bNext)
+                    }
+                    if (bNext === undefined) {
+                        return main(aNext.value.edge)(aNext)(b)
+                    }
+                    switch (strategy.intervalSequence.sign(aNext.value.edge)(bNext.value.edge)) {
+                        case -1:
+                            return main(aNext.value.edge)(aNext)(b)
+                        case 1:
+                            return main(bNext.value.edge)(a)(bNext)
+                        case 0:
+                        default:
+                            return main(aNext.value.edge)(aNext)(bNext)
+                    }
+                }
+            })
+        const valueEqual
+            : (_: IntervalLeft<E, R>) => (_: IntervalLeft<E, R>) => boolean
+            = a => b => strategy.intervalSequence.equal(a.value)(b.value)
+        return a => b => sequence.dedup(valueEqual)(main(strategy.intervalSequence.min)(a)(b))
+    }
 
+/*
 export const merge
     : Merge
     = ({ intervalSequence, reduce }) => {
@@ -66,7 +110,7 @@ export const merge
         const next
             : (_: E) => (_: Pair<E, A, B>) => sequence.NonEmptySequence<IntervalLeft<E, R>>
             = edge => p => ({
-                value: { value: reduce(p.a.first)(p.b.first), edge },
+                value: { value: reduce(p.a.value)(p.b.first), edge },
                 next: () => listMerge(p)
             })
         const listMerge
@@ -129,3 +173,4 @@ export const merge
             }
         return result
     }
+*/
