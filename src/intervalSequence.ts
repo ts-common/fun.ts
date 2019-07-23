@@ -61,9 +61,9 @@ export const merge
                 => (_: IntervalSequence<E, A>)
                 => (_: IntervalSequence<E, B>)
                 => IntervalLeftSequence<E, R>
-            = edge => a => b => {
+            = min => a => b => {
                 const { first, rest } = main(a)(b)
-                return { first: { min: edge, value: first.value }, rest }
+                return { first: { min, value: first.value }, rest }
             }
         const main
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
