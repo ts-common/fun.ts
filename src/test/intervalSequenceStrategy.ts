@@ -21,7 +21,9 @@ export const strategyS
         equal: equal.strictEqual,
     }
 
-export type IntervalSequenceyN = intervalSequence.IntervalSequence<number, number>
+export const mergeS = intervalSequence.merge(strategyS)(reduceS)
+
+export type IntervalSequenceN = intervalSequence.IntervalSequence<number, number>
 
 export type StrategyN = intervalSequence.Strategy<number, number>
 
@@ -37,3 +39,5 @@ export const strategyN
 export const reduceN
     : ReduceN
     = a => b => a < b ? a : b
+
+export const mergeN = intervalSequence.merge(strategyN)(reduceN)
