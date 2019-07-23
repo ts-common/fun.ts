@@ -105,3 +105,54 @@ describe('merge', () => {
             .toBeUndefined()
     })
 })
+
+describe('merge', () => {
+    it('add', () => {
+        const a: IntervalMapN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 }
+            ])
+        }
+        const b: intervalSequence.Interval<number, number> = {
+            min: 1,
+            max: 2,
+            value: 15,
+        }
+        const r = intervalSequence.add(strategyN.intervalSequence)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(sequence.toArray(r.rest))
+            .toStrictEqual([
+                { edge: 0, value: 1},
+                { edge: 1, value: 15},
+                { edge: 2, value: 1},
+                { edge: 5, value: 2 }
+            ])
+    })
+    it('addEnd', () => {
+        const a: IntervalMapN = {
+            first: 0,
+            rest: sequence.fromArray([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 }
+            ])
+        }
+        const b: intervalSequence.Interval<number, number> = {
+            min: 6,
+            max: 10,
+            value: 15,
+        }
+        const r = intervalSequence.add(strategyN.intervalSequence)(a)(b)
+        expect(r.first)
+            .toBe(0)
+        expect(sequence.toArray(r.rest))
+            .toStrictEqual([
+                { edge: 0, value: 1},
+                { edge: 5, value: 2 },
+                { edge: 6, value: 15 },
+                { edge: 10, value: 2 }
+            ])
+    })
+})
