@@ -106,21 +106,6 @@ export const merge
                 const { value, next } = main(a)(b)
                 return { value, next: () => sequence.dedup(dedupEqual)(sequence.dropWhile(dedupEqual(value))(next())) }
             }
-                const first = reduce(a.first)(b.first)
-                const rest = sequence.dedup(dedupEqual)(listMerge({ a, b }))
-
-                // need to drop initial intervals that are the same value as the first
-                const isSameAsFisrt
-                    : predicate.Predicate<IntervalLeft<E, R>>
-                    = p => strategy.equal(p.value)(first)
-
-                const uniqueRest = sequence.dropWhile(isSameAsFisrt)(rest)
-
-                return {
-                    first,
-                    rest: uniqueRest,
-                }
-            }
         return result
     }
 
@@ -139,8 +124,8 @@ export const add
         type A = EA[1]
 
         const mergeSeq: IntervalSequence<E, A | undefined> = {
-            first: undefined,
-            rest: sequence.fromArray([
+            value: { value: undefined },
+            next: () => sequence.fromArray([
                 { edge: toAdd.min, value: toAdd.value },
                 { edge: toAdd.max, value: undefined }
             ])

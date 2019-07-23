@@ -23,11 +23,9 @@ export const strategyS
 
 export const mergeS = intervalSequence.merge(strategyS)(reduceS)
 
-export type IntervalSequenceyN = intervalSequence.IntervalSequence<number, number>
+export type IntervalSequenceN = intervalSequence.IntervalSequence<number, number>
 
 export type StrategyN = intervalSequence.Strategy<number, number>
-
-export type ReduceN = intervalSequence.Reduce<number, number, number>
 
 export type ReduceN = intervalSequence.Reduce<number, number, number>
 
