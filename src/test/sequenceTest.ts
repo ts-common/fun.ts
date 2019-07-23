@@ -14,13 +14,13 @@ describe('fromArray', () => {
         if (result === undefined) {
             throw new Error('')
         }
-        expect(result.value)
+        expect(result.first)
             .toBe(45)
-        const result2 = result.next()
+        const result2 = result.rest()
         if (result2 === undefined) {
             throw new Error('')
         }
-        expect(result2.value)
+        expect(result2.first)
             .toBe(89)
     })
 })
