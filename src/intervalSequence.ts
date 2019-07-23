@@ -9,6 +9,13 @@ export type IntervalLeft<E, T> = {
     readonly value: T
 }
 
+// [min, max)
+export type Interval<E, T> = {
+    readonly min: E
+    readonly max: E
+    readonly value: T
+}
+
 export type IntervalSequence<E, T> = {
     readonly first: T
     readonly rest: sequence.Sequence<IntervalLeft<E, T>>
@@ -128,4 +135,32 @@ export const merge
                 }
             }
         return result
+    }
+
+export type Add
+    =  <E, A>(_: Strategy<E, A>)
+    => (_: IntervalSequence<E, A>)
+    => (_: Interval<E, A | undefined>)
+    => IntervalSequence<E, A>
+
+export const add
+    : Add
+    = intervalSequence => current => toAdd => {
+        type EA = typeof current extends IntervalSequence<infer _E, infer _A>
+            ? readonly [_E, _A] : never
+        type E = EA[0]
+        type A = EA[1]
+
+        const mergeSeq: IntervalSequence<E, A | undefined> = {
+            first: undefined,
+            rest: sequence.fromArray([
+                { edge: toAdd.min, value: toAdd.value },
+                { edge: toAdd.max, value: undefined }
+            ])
+        }
+
+        return merge<E, A, A | undefined, A>({
+            intervalSequence,
+            reduce: a => b => b === undefined ? a : b
+        })(current)(mergeSeq)
     }
