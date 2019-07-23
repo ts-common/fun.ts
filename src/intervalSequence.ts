@@ -44,8 +44,8 @@ const drop
 export type Reduce<A, B, R> = (_: A) => (_: B) => R
 
 export type Merge
-    = <E, A, B, R>(_: Strategy<E, R>)
-    => (_: Reduce<A, B, R>)
+    = <E, R>(_: Strategy<E, R>)
+    => <A, B>(_: Reduce<A, B, R>)
     => (_: IntervalSequence<E, A>)
     => (_: IntervalSequence<E, B>)
     => IntervalSequence<E, R>
@@ -159,7 +159,9 @@ export const add
             : (_: A) => (_: A | undefined) => A
             = a => b => b === undefined ? a : b
 
-        const returnValue = merge<E, A, A | undefined, A>(strategy)(reduce)(current)(mergeSeq)
+        const result
+            : IntervalSequence<E, A>
+            = merge<E, A>(strategy)<A, A | undefined>(reduce)(current)(mergeSeq)
 
-        return returnValue
+        return result
     }

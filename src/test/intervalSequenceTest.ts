@@ -9,8 +9,8 @@ describe('merge', () => {
         const b: isTestStrat.IntervalSequenceS = { first: 'second', rest: undefined }
         const r =
             intervalSequence.merge
-                <number, string, string, string>
-                (isTestStrat.strategyS)(isTestStrat.reduceS)(a)(b)
+                <number, string>(isTestStrat.strategyS)
+                <string, string>(isTestStrat.reduceS)(a)(b)
 
         expect(r)
             .toStrictEqual({ first: 'first.second', rest: undefined })
@@ -19,9 +19,9 @@ describe('merge', () => {
         const a: isTestStrat.IntervalSequenceS = { first: 'a0', rest: sequence.fromArray([{ edge: 12, value: 'a1'}]) }
         const b: isTestStrat.IntervalSequenceS = { first: 'b0', rest: undefined }
         const r =
-            intervalSequence.merge
-                <number, string, string, string>
-                (isTestStrat.strategyS)(isTestStrat.reduceS)(a)(b)
+        intervalSequence.merge
+        <number, string>(isTestStrat.strategyS)
+        <string, string>(isTestStrat.reduceS)(a)(b)
 
         expect(r.first)
             .toBe('a0.b0')
@@ -32,9 +32,9 @@ describe('merge', () => {
         const a: isTestStrat.IntervalSequenceS = { first: 'a0', rest: undefined }
         const b: isTestStrat.IntervalSequenceS = { first: 'b0', rest: sequence.fromArray([{ edge: 12, value: 'b1'}]) }
         const r =
-            intervalSequence.merge
-                <number, string, string, string>
-                (isTestStrat.strategyS)(isTestStrat.reduceS)(a)(b)
+        intervalSequence.merge
+        <number, string>(isTestStrat.strategyS)
+        <string, string>(isTestStrat.reduceS)(a)(b)
 
         expect(r.first)
             .toBe('a0.b0')
@@ -59,9 +59,9 @@ describe('merge', () => {
             ])
         }
         const r =
-            intervalSequence.merge
-                <number, string, string, string>
-                (isTestStrat.strategyS)(isTestStrat.reduceS)(a)(b)
+        intervalSequence.merge
+        <number, string>(isTestStrat.strategyS)
+        <string, string>(isTestStrat.reduceS)(a)(b)
 
         expect(r.first)
             .toBe('a0.b0')
@@ -93,8 +93,8 @@ describe('merge', () => {
         }
         const r =
             intervalSequence.merge
-                <number, number, number, number>
-                (isTestStrat.strategyN)(isTestStrat.reduceN)(a)(b)
+                <number, number>(isTestStrat.strategyN)
+                <number, number>(isTestStrat.reduceN)(a)(b)
 
         expect(r.first)
             .toBe(0)
@@ -120,8 +120,8 @@ describe('merge', () => {
         }
         const r =
             intervalSequence.merge
-                <number, number, number, number>
-                (isTestStrat.strategyN)(isTestStrat.reduceN)(a)(b)
+                <number, number>(isTestStrat.strategyN)
+                <number, number>(isTestStrat.reduceN)(a)(b)
 
         expect(r.first)
             .toBe(0)
