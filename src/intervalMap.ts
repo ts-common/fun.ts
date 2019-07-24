@@ -70,3 +70,22 @@ const noLimit
 export const intervalMap
     : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
     = s => noLimit(0)(map0(s))
+
+export const get
+    : <E, T>(_: intervalSequence.Strategy<E, T>) => (_: IntervalMap<E, T>) => (_: E) => T
+    = strategy => {
+        type Types = typeof strategy extends intervalSequence.Strategy<infer _E, infer _T> ? readonly [_E, _T] : never
+        type E = Types[0]
+        type T = Types[1]
+        const main
+            : (_: E) => (_: IntervalMap<E, T>) => T
+            = e => {
+                const result
+                    : (_: IntervalMap<E, T>) => T
+                    = map => map.kind === 'leaf'
+                        ? map.value
+                        : result(strategy.compare(e)(map.rightMin) === -1 ? map.left : map.right)
+                return result
+            }
+        return map => e => main(e)(map)
+    }
