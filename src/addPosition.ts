@@ -25,18 +25,17 @@ export const terminal = ''
 
 export const addPosition = (i: sequence.Sequence<string>): sequence.Sequence<CharAndPosition> => {
     const nextFromPos
-    : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
-    = position => c => {
+        : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
+        = position => c => {
 
-        const nextPosition = {
-            column: c === '\n' ? 1 : position.column + 1,
-            line: c === '\n' ? position.line + 1 : position.line
-        }
+        const nextPosition = c === '\n' ?
+            { column: 1,                    line: position.line + 1 } :
+            { column: position.column + 1,  line: position.line }
 
         const next = nextFromPos(nextPosition)
 
         return {
-            value: { c, position},
+            value: { c, position },
             next
         }
     }
