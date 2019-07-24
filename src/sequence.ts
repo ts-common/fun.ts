@@ -3,9 +3,11 @@ import * as equal from './equal'
 import * as optional from './optional'
 import * as predicate from './predicate'
 
+export type LazySequence<T> = () => Sequence<T>
+
 export type NonEmptySequence<T> = {
     readonly first: T
-    readonly rest: () => Sequence<T>
+    readonly rest: LazySequence<T>
 }
 
 export type Sequence<T> = NonEmptySequence<T> | undefined
@@ -62,9 +64,9 @@ export type NextFilterState<T> = NextState<T, boolean>
 export const scanFilter
     : <T>(_: NextFilterState<T>) => (_: Sequence<T>) => Sequence<T>
     = nextFilterState => optional.map(({ first, rest }) => {
-        const state = nextFilterState(first)
-        const nextState = () => scanFilter(state.next)(rest())
-        return state.value ? { first, rest: nextState } : nextState()
+        const { value, next } = nextFilterState(first)
+        const nextState = () => scanFilter(next)(rest())
+        return value ? { first, rest: nextState } : nextState()
     })
 
 /**
@@ -162,10 +164,10 @@ export const map
 export const last
     : <T>(_: NonEmptySequence<T>) => T
     = ({ first, rest }) => {
-        const nextSequence = rest()
+        const restSequence = rest()
         // Hopefully, last() is PTC (proper tail call).
         // Link: https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/
-        return nextSequence === undefined ? first : last(nextSequence)
+        return restSequence === undefined ? first : last(restSequence)
     }
 
 export const exclusiveFold
@@ -182,24 +184,19 @@ export const toArray
         (accumulator(push)<typeof sequence extends Sequence<infer I> ? I : never>([]))
         (sequence)
 
-type ReverseTail<T> = {
-    readonly sequence: Sequence<T>
-    readonly tail: Sequence<T>
-}
-
 const reverseTail
-    : <T>(_: ReverseTail<T>) => Sequence<T>
-    = ({ sequence, tail }) => sequence === undefined
+    : <T>(_: Sequence<T>) => (_: Sequence<T>) => Sequence<T>
+    = tail => sequence => sequence === undefined
         ? tail
         // Tail recursion
-        : reverseTail({ sequence: sequence.rest(), tail: { first: sequence.first, rest: () => tail } })
+        : reverseTail({ first: sequence.first, rest: () => tail })(sequence.rest())
 
 export const reverse
     : <T>(_: Sequence<T>) => Sequence<T>
-    = sequence => reverseTail({ sequence, tail: undefined })
+    = reverseTail(undefined)
 
 const concatFront
-    : <T>(_: () => Sequence<T>) => (_: Sequence<T>) => Sequence<T>
+    : <T>(_: LazySequence<T>) => (_: Sequence<T>) => Sequence<T>
     = b => {
         type S = typeof b extends () => (infer U) ? U : never
         const f
@@ -212,15 +209,10 @@ export const concat
     : <T>(_: Sequence<T>) => (_: Sequence<T>) => Sequence<T>
     = a => b => concatFront(() => b)(a)
 
-type SizeState<T> = {
-    readonly value: number
-    readonly rest: Sequence<T>
-}
-
 const foldSizeState
-    : <T>(_: SizeState<T>) => number
-    = ({ value, rest }) => rest === undefined ? value : foldSizeState({ value: value + 1, rest: rest.rest() })
+    : (_: number) => <T>(_: Sequence<T>) => number
+    = value => sequence => sequence === undefined ? value : foldSizeState(value + 1)(sequence.rest())
 
 export const size
     : <T>(_: Sequence<T>) => number
-    = rest => foldSizeState({ value: 0, rest })
+    = foldSizeState(0)

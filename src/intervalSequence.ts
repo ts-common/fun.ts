@@ -2,9 +2,9 @@ import * as sequence from './sequence'
 import * as equal from './equal'
 import * as sign from './sign'
 
-// [edge, +Infinity)
+// [min, +Infinity)
 export type IntervalLeft<E, T> = {
-    readonly edge: E
+    readonly min: E
     readonly value: T
 }
 
@@ -34,7 +34,7 @@ export const fromArray
     })
 
 export type Strategy<E, T> = {
-    readonly sign: sign.Compare<E>
+    readonly compare: sign.Compare<E>
     readonly equal: equal.Equal<T>
 }
 
@@ -61,39 +61,39 @@ export const merge
                 => (_: IntervalSequence<E, A>)
                 => (_: IntervalSequence<E, B>)
                 => IntervalLeftSequence<E, R>
-            = edge => a => b => {
+            = min => a => b => {
                 const { first, rest } = main(a)(b)
-                return { first: { edge, value: first.value }, rest }
+                return { first: { min, value: first.value }, rest }
             }
         const main
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => ({
                 first: { value: reduce(a.first.value)(b.first.value) },
                 rest: () => {
-                    const aNext = a.rest()
-                    const bNext = b.rest()
+                    const aRest = a.rest()
+                    const bRest = b.rest()
                     const aShift
                         : (_: sequence.NonEmptySequence<IntervalLeft<E, A>>) => IntervalLeftSequence<E, R>
-                        = n => intervalLeftSequence(n.first.edge)(n)(b)
+                        = n => intervalLeftSequence(n.first.min)(n)(b)
                     const bShift
                         : (_: sequence.NonEmptySequence<IntervalLeft<E, B>>) => IntervalLeftSequence<E, R>
-                        = n => intervalLeftSequence(n.first.edge)(a)(n)
-                    if (aNext === undefined) {
-                        if (bNext === undefined) {
+                        = n => intervalLeftSequence(n.first.min)(a)(n)
+                    if (aRest === undefined) {
+                        if (bRest === undefined) {
                             return undefined
                         }
-                        return bShift(bNext)
+                        return bShift(bRest)
                     }
-                    if (bNext === undefined) {
-                        return aShift(aNext)
+                    if (bRest === undefined) {
+                        return aShift(aRest)
                     }
-                    switch (strategy.sign(aNext.first.edge)(bNext.first.edge)) {
+                    switch (strategy.compare(aRest.first.min)(bRest.first.min)) {
                         case -1:
-                            return aShift(aNext)
+                            return aShift(aRest)
                         case 1:
-                            return bShift(bNext)
+                            return bShift(bRest)
                         default:
-                            return intervalLeftSequence(aNext.first.edge)(aNext)(bNext)
+                            return intervalLeftSequence(aRest.first.min)(aRest)(bRest)
                     }
                 }
             })
@@ -104,7 +104,12 @@ export const merge
             : (_: IntervalSequence<E, A>) => (_: IntervalSequence<E, B>) => IntervalSequence<E, R>
             = a => b => {
                 const { first, rest } = main(a)(b)
-                return { first, rest: () => sequence.dedup(dedupEqual)(sequence.dropWhile(dedupEqual(first))(rest())) }
+                return {
+                    first,
+                    rest: () => sequence.dedup
+                        (dedupEqual)
+                        (sequence.dropWhile(dedupEqual(first))(rest()))
+                }
             }
         return result
     }
@@ -117,7 +122,7 @@ export type Add
 
 export const add
     : Add
-    = strategy => current => toAdd => {
+    = strategy => current => ({ min, max, value}) => {
         type EA = typeof current extends IntervalSequence<infer _E, infer _A>
             ? readonly [_E, _A] : never
         type E = EA[0]
@@ -126,8 +131,8 @@ export const add
         const mergeSeq: IntervalSequence<E, A | undefined> = {
             first: { value: undefined },
             rest: () => sequence.fromArray([
-                { edge: toAdd.min, value: toAdd.value },
-                { edge: toAdd.max, value: undefined }
+                { min, value },
+                { min: max, value: undefined }
             ])
         }
 
@@ -135,9 +140,5 @@ export const add
             : (_: A) => (_: A | undefined) => A
             = a => b => b === undefined ? a : b
 
-        const result
-            : IntervalSequence<E, A>
-            = merge<E, A>(strategy)<A, A | undefined>(reduce)(current)(mergeSeq)
-
-        return result
+        return merge(strategy)(reduce)(current)(mergeSeq)
     }
