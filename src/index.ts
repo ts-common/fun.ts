@@ -1,5 +1,5 @@
 import * as it from '@ts-common/iterator'
-import { CharAndPosition, Position, terminal } from '@ts-common/add-position'
+import { CharAndPosition, Position, terminal } from './addPosition'
 import * as meta from './meta'
 
 type CharSet = (_: string) => boolean

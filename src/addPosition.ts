@@ -21,6 +21,7 @@ export type CharAndPosition = {
      */
     readonly position: Position
 }
+export const terminal = ''
 
 export const addPosition = (i: sequence.Sequence<string>): sequence.Sequence<CharAndPosition> => {
     const nextFromPos
@@ -39,8 +40,9 @@ export const addPosition = (i: sequence.Sequence<string>): sequence.Sequence<Cha
             next
         }
     }
+    const withTerminal = sequence.concat(i)(sequence.fromArray([terminal]))
 
-    const result = sequence.inclusiveScan<string, CharAndPosition>(nextFromPos({ column: 1, line: 1 }))(i)
+    const result = sequence.inclusiveScan<string, CharAndPosition>(nextFromPos({ column: 1, line: 1 }))(withTerminal)
 
     return result
 }
