@@ -64,9 +64,9 @@ const limitedMap
     }
 
 const noLimit
-    : <E, T>(_: LimitedMap<E, T>) => (_: number) => IntervalMap<E, T>
-    = ({ map, rest }) => limit => rest === undefined ? map : noLimit(addRoot(map)(rest)(limit))(limit + 1)
+    : (_: number) => <E, T>(_: LimitedMap<E, T>) => IntervalMap<E, T>
+    = limit => ({ map, rest }) => rest === undefined ? map : noLimit(limit + 1)(addRoot(map)(rest)(limit))
 
 export const intervalMap
     : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
-    = s => noLimit(map0(s))(0)
+    = s => noLimit(0)(map0(s))
