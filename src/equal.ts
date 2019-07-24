@@ -1,5 +1,6 @@
 /**
- * `Equal<T>` is the type of a function that takes two elements of type `T` and returns if they are equal as a boolean value
+ * `Equal<T>` is the type of a function that takes two elements
+ * of type `T` and returns if they are equal as a boolean value
  */
 export type Equal<T> = (_: T) => (_: T) => boolean
 
