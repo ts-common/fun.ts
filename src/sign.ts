@@ -1,5 +1,6 @@
 /**
- * `Sign` encodes the result of comparing two elements: `-1` for *less than*, `0` for *equal* and `1` for *greater than*
+ * `Sign` encodes the result of comparing two elements:
+ * `-1` for *less than*, `0` for *equal* and `1` for *greater than*
  */
 export type Sign = -1 | 0 | 1
 
@@ -11,7 +12,7 @@ export type Compare<E> = (_: E) => (_: E) => Sign
 /**
  * @param a a number
  * @param b another number
- * @returns returns the `Sign` of comparing the numbers `a` and `b`
+ * @returns returns a `Sign` value after comparing the numbers `a` and `b`
  */
 export const numberCompare
     : (_: number) => (_: number) => Sign

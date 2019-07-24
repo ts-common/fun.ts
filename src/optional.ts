@@ -1,10 +1,10 @@
 /**
- * Optional is either a value of a type `T` or `undefined`
+ * An Optional<T> is either a value of a type `T` or `undefined`
  */
 export type Optional<T> = T | undefined
 
 /**
- * @param f a function from a type T to a type R
+ * @param f a function from a type `T` to a type `R`
  * @param optional an `Optional` value of type `T` or `undefined`
  * @returns the result of applying f to `optional` if it's defined, otherwise undefined.
  */
