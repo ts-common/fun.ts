@@ -29,4 +29,3 @@ An interval map is constructed from an interval sequence. It's constructed using
 |                |                                        |                                         |    |
 |             32 | 32 + f(16) + f(16) = 32 + 64 + 64 = 160| 160                                     |    |
 |             33 | 33 + f(32) + f(1)  = 33 + 160 + 0 = 193| 33 + f(17) + f(16) = 33 + 70 + 64 = 167 |26  |
-
