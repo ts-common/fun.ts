@@ -21,27 +21,29 @@ export type CharAndPosition = {
      */
     readonly position: Position
 }
+
 export const terminal = ''
 
-export const addPosition = (i: sequence.Sequence<string>): sequence.Sequence<CharAndPosition> => {
-    const nextFromPos
-        : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
-        = position => c => {
+export const addPosition
+    : (_: sequence.Sequence<string>) => sequence.Sequence<CharAndPosition>
+    = i => {
+        const nextFromPos
+            : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
+            = position => c => {
 
-        const nextPosition = c === '\n' ?
-            { column: 1,                    line: position.line + 1 } :
-            { column: position.column + 1,  line: position.line }
+                const nextPosition = c === '\n' ?
+                    { column: 1,                    line: position.line + 1 } :
+                    { column: position.column + 1,  line: position.line }
 
-        const next = nextFromPos(nextPosition)
+                const next = nextFromPos(nextPosition)
 
-        return {
-            value: { c, position },
-            next
-        }
+                return {
+                    value: { c, position },
+                    next
+                }
+            }
+
+        const withTerminal = sequence.concat(i)(sequence.fromArray([terminal]))
+
+        return sequence.inclusiveScan(nextFromPos({ column: 1, line: 1 }))(withTerminal)
     }
-    const withTerminal = sequence.concat(i)(sequence.fromArray([terminal]))
-
-    const result = sequence.inclusiveScan<string, CharAndPosition>(nextFromPos({ column: 1, line: 1 }))(withTerminal)
-
-    return result
-}
