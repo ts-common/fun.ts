@@ -129,6 +129,7 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 - https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/
 - http://dippl.org/chapters/02-webppl.html
 - https://github.com/gcanti/fp-ts
+- https://github.com/jonaskello/tslint-immutable
 
 ## ECMAScript Proposals
 
