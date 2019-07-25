@@ -2,7 +2,8 @@
 
 ## Interval Map
 
-An interval map is constructed from an interval sequence. It's constructed using only one pass. It's not always optimal try because of only one pass.
+An interval map is constructed from an interval sequence. It's constructed using only one pass. It's not always an optimal tree
+because of only one pass. It's still O(log(N)) comparisons.
 
 ### Number of comparisons
 
