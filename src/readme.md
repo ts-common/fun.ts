@@ -2,11 +2,11 @@
 
 ## Interval Map
 
-An interval map is constructed from an interval sequence. It's constructed using only one pass. It's not always optimal try because of only one pass.
+The 'onePass' func constructs an interval map from an interval sequence by using only one pass. It's not always an optimal tree but it's still O(log(N)) comparisons.
 
 ### Number of comparisons
 
-| # of intervals | # of comparisons                       | optimal # of comparisons                |diff|
+| # of intervals | `onePass` # of comparisons             | `intervalMap` # of comparisons          |diff|
 |----------------|----------------------------------------|-----------------------------------------|----|
 |              1 |  0                                     |  0                                      |    |
 |              2 |  2                                     |  2                                      |    |
