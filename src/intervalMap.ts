@@ -24,15 +24,15 @@ const addRoot
         => (_: sequence.NonEmptySequence<intervalSequence.IntervalLeft<E, T>>)
         => (_: number)
         => LimitedMap<E, T>
-    = left => rest => limit => {
-        const right = limitedMap(rest)(limit)
+    = left => middle => size => {
+        const { map, rest } = limitedMap(middle)(size)
         return {
             map: {
                 left,
-                rightMin: rest.first.min,
-                right: right.map
+                rightMin: middle.first.min,
+                right: map
             },
-            rest: right.rest
+            rest
         }
     }
 
@@ -62,7 +62,7 @@ const limitedMap
 
 const noLimit
     : (_: number) => <E, T>(_: LimitedMap<E, T>) => IntervalMap<E, T>
-    = limit => ({ map, rest }) => rest === undefined ? map : noLimit(limit * 2)(addRoot(map)(rest)(limit))
+    = size => ({ map, rest }) => rest === undefined ? map : noLimit(size * 2)(addRoot(map)(rest)(size))
 
 export const onePass
     : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
