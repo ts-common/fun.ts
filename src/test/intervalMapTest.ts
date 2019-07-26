@@ -3,10 +3,10 @@ import * as intervalSequence from '../intervalSequence'
 import * as intervalMap from '../intervalMap'
 import { strategyS, IntervalSequenceS } from './intervalSequenceStrategy'
 
-describe('intervalMap', () => {
+describe('onePass', () => {
     it('one', () => {
         const s: IntervalSequenceS = intervalSequence.fromArray('a')([])
-        const result = intervalMap.intervalMap(s)
+        const result = intervalMap.onePass(s)
         expect(result)
             .toStrictEqual({ value: 'a' })
         const x = intervalMap.get(strategyS)(result)(12)
@@ -15,7 +15,7 @@ describe('intervalMap', () => {
     })
     it('two', () => {
         const s = intervalSequence.fromArray('a')([{ min: 23, value: 'b' }])
-        const result = intervalMap.intervalMap(s)
+        const result = intervalMap.onePass(s)
         expect(result)
             .toStrictEqual({
                 left: { value: 'a' },
@@ -31,7 +31,7 @@ describe('intervalMap', () => {
     })
     it('three', () => {
         const s = intervalSequence.fromArray('a')([{ min: 23, value: 'b' }, { min: 45, value: 'A' }])
-        const result = intervalMap.intervalMap(s)
+        const result = intervalMap.onePass(s)
         expect(result)
             .toStrictEqual({
                 left: {
@@ -58,7 +58,7 @@ describe('intervalMap', () => {
             { min: 45, value: 'Z' },
             { min: 76, value: 'A' }
         ])
-        const result = intervalMap.intervalMap(s)
+        const result = intervalMap.onePass(s)
         expect(result)
             .toStrictEqual({
                 left: {
@@ -93,7 +93,7 @@ describe('intervalMap', () => {
             { min: 76, value: 'A' },
             { min: 90, value: 'x' },
         ])
-        const result = intervalMap.intervalMap(s)
+        const result = intervalMap.onePass(s)
         expect(result)
             .toStrictEqual({
                 left: {
@@ -130,10 +130,10 @@ describe('intervalMap', () => {
     })
 })
 
-describe('balanced', () => {
+describe('intervalMap', () => {
     it('one', () => {
         const s: IntervalSequenceS = intervalSequence.fromArray('a')([])
-        const result = intervalMap.balanced(s)
+        const result = intervalMap.intervalMap(s)
         expect(result)
             .toStrictEqual({ value: 'a' })
         const x = intervalMap.get(strategyS)(result)(12)
@@ -142,7 +142,7 @@ describe('balanced', () => {
     })
     it('two', () => {
         const s = intervalSequence.fromArray('a')([{ min: 23, value: 'b' }])
-        const result = intervalMap.balanced(s)
+        const result = intervalMap.intervalMap(s)
         expect(result)
             .toStrictEqual({
                 left: { value: 'a' },
@@ -158,7 +158,7 @@ describe('balanced', () => {
     })
     it('three', () => {
         const s = intervalSequence.fromArray('a')([{ min: 23, value: 'b' }, { min: 45, value: 'A' }])
-        const result = intervalMap.balanced(s)
+        const result = intervalMap.intervalMap(s)
         expect(result)
             .toStrictEqual({
                 left: { value: 'a' },
@@ -185,7 +185,7 @@ describe('balanced', () => {
             { min: 45, value: 'Z' },
             { min: 76, value: 'A' }
         ])
-        const result = intervalMap.balanced(s)
+        const result = intervalMap.intervalMap(s)
         expect(result)
             .toStrictEqual({
                 left: {
@@ -220,7 +220,7 @@ describe('balanced', () => {
             { min: 76, value: 'A' },
             { min: 90, value: 'x' },
         ])
-        const result = intervalMap.balanced(s)
+        const result = intervalMap.intervalMap(s)
         expect(result)
             .toStrictEqual({
                 left: {

@@ -64,9 +64,13 @@ const noLimit
     : (_: number) => <E, T>(_: LimitedMap<E, T>) => IntervalMap<E, T>
     = limit => ({ map, rest }) => rest === undefined ? map : noLimit(limit * 2)(addRoot(map)(rest)(limit))
 
-export const intervalMap
+export const onePass
     : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
     = s => noLimit(1)(map0(s))
+
+export const intervalMap
+    : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
+    = s => limitedMap(s)(sequence.size(s)).map
 
 export const get
     : <E, T>(_: intervalSequence.Strategy<E, T>) => (_: IntervalMap<E, T>) => (_: E) => T
@@ -86,7 +90,3 @@ export const get
             }
         return map => e => main(e)(map)
     }
-
-export const balanced
-    : <E, T>(_: intervalSequence.IntervalSequence<E, T>) => IntervalMap<E, T>
-    = s => limitedMap(s)(sequence.size(s)).map
