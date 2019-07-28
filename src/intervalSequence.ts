@@ -117,7 +117,7 @@ export const merge
 export type Add
     = <E, A>(_: Strategy<E, A>)
     => (_: IntervalSequence<E, A>)
-    => (_: Interval<E, A | undefined>)
+    => (_: Interval<E, A>)
     => IntervalSequence<E, A>
 
 type AddReduce<T> = Reduce<T, T | undefined, T>
