@@ -24,26 +24,22 @@ export type CharAndPosition = {
 
 export const terminal = ''
 
+const sequenceTerminal
+    = sequence.just(terminal)
+
+const nextFromPosition
+    : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
+    = position => c => ({
+        value: { c, position },
+        next: nextFromPosition(c === '\n'
+            ? { column: 1, line: position.line + 1}
+            : { column: position.column + 1, line: position.line }
+        )
+    })
+
+const addPositionScan
+    = sequence.inclusiveScan(nextFromPosition({ column: 1, line: 1 }))
+
 export const addPosition
     : (_: sequence.Sequence<string>) => sequence.Sequence<CharAndPosition>
-    = i => {
-        const nextFromPos
-            : (_: Position) => (_: string) => sequence.State<string, CharAndPosition>
-            = position => c => {
-
-                const nextPosition = c === '\n' ?
-                    { column: 1,                    line: position.line + 1 } :
-                    { column: position.column + 1,  line: position.line }
-
-                const next = nextFromPos(nextPosition)
-
-                return {
-                    value: { c, position },
-                    next
-                }
-            }
-
-        const withTerminal = sequence.concat(i)(sequence.fromArray([terminal]))
-
-        return sequence.inclusiveScan(nextFromPos({ column: 1, line: 1 }))(withTerminal)
-    }
+    = i => addPositionScan(sequence.concat(i)(sequenceTerminal))
