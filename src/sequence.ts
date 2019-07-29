@@ -10,7 +10,14 @@ export type NonEmptySequence<T> = {
     readonly rest: LazySequence<T>
 }
 
+export const lazyUndefined
+    = () => undefined
+
 export type Sequence<T> = NonEmptySequence<T> | undefined
+
+export const just
+    : <T>(_: T) => NonEmptySequence<T>
+    = first => ({ first, rest: lazyUndefined })
 
 export const fromArray
     : <T>(_: readonly T[]) => Sequence<T>
@@ -37,13 +44,13 @@ export const accumulator
         type TR = typeof reduce extends Reduce<infer T0, infer R0> ? readonly [T0, R0] : never
         type T = TR[0]
         type R = TR[1]
-        const f
+        const main
             : (_: R) => State<T, R>
             = value => ({
                 value,
-                next: v => f(reduce(value)(v))
+                next: v => main(reduce(value)(v))
             })
-        return f
+        return main
     }
 
 export const inclusiveScan
@@ -78,10 +85,7 @@ export const dropWhile
         type T = typeof p extends predicate.Predicate<infer _T> ? _T : never
         const result
             : (_: Sequence<T>) => Sequence<T>
-            = optional.map(({ first, rest }) => {
-                const dropNext = () => result(rest())
-                return p(first) ? dropNext() : { first, rest }
-            })
+            = optional.map(({ first, rest }) => p(first) ? result(rest()) : { first, rest })
         return result
     }
 
@@ -100,8 +104,8 @@ export const filter
 
 const dedupNextState
     : <T>(_: equal.Equal<T>) => NextFilterState<T>
-    = e => {
-        type T = typeof e extends equal.Equal<infer _T> ? _T : never
+    = eq => {
+        type T = typeof eq extends equal.Equal<infer _T> ? _T : never
         const createState
             : (_: boolean) => (_: T) => FilterState<T>
             = value => current => ({
@@ -110,13 +114,13 @@ const dedupNextState
             })
         const nextState
             : (_: T) => (_: T) => FilterState<T>
-            = prior => current => createState(!e(prior)(current))(current)
+            = prior => current => createState(!eq(prior)(current))(current)
         return createState(true)
     }
 
 export const dedup
     : <T>(_: equal.Equal<T>) => (_: Sequence<T>) => Sequence<T>
-    = e => scanFilter(dedupNextState(e))
+    = eq => scanFilter(dedupNextState(eq))
 
 export const flatten
     : <T>(_: Sequence<Sequence<T>>) => Sequence<T>
@@ -199,10 +203,10 @@ const concatFront
     : <T>(_: LazySequence<T>) => (_: Sequence<T>) => Sequence<T>
     = b => {
         type S = typeof b extends () => (infer U) ? U : never
-        const f
+        const main
             : (_: S) => S
-            = a => a === undefined ? b() : { first: a.first, rest: () => f(a.rest()) }
-        return f
+            = a => a === undefined ? b() : { first: a.first, rest: () => main(a.rest()) }
+        return main
     }
 
 export const concat

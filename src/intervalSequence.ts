@@ -114,31 +114,38 @@ export const merge
         return result
     }
 
+export const fromInterval
+    : <E, A>(_: Interval<E, A>) => IntervalSequence<E, A | undefined>
+    = ({ min, max, value }) => ({
+        first: { value: undefined },
+        rest: () => sequence.fromArray([
+            { min, value },
+            { min: max, value: undefined }
+        ])
+    })
+
 export type Add
     = <E, A>(_: Strategy<E, A>)
     => (_: IntervalSequence<E, A>)
-    => (_: Interval<E, A | undefined>)
+    => (_: Interval<E, A>)
     => IntervalSequence<E, A>
+
+type AddReduce<T> = Reduce<T, T | undefined, T>
+
+const addReduce
+    : <A>(_: A) => (_: A | undefined) => A
+    = a => b => b === undefined ? a : b
 
 export const add
     : Add
-    = strategy => current => ({ min, max, value}) => {
+    = strategy => current => interval => {
         type EA = typeof current extends IntervalSequence<infer _E, infer _A>
             ? readonly [_E, _A] : never
-        type E = EA[0]
         type A = EA[1]
 
-        const mergeSeq: IntervalSequence<E, A | undefined> = {
-            first: { value: undefined },
-            rest: () => sequence.fromArray([
-                { min, value },
-                { min: max, value: undefined }
-            ])
-        }
-
         const reduce
-            : (_: A) => (_: A | undefined) => A
-            = a => b => b === undefined ? a : b
+            : AddReduce<A>
+            = addReduce
 
-        return merge(strategy)(reduce)(current)(mergeSeq)
+        return merge(strategy)(reduce)(current)(fromInterval(interval))
     }
