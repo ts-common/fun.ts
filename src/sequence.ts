@@ -2,6 +2,7 @@ import * as meta from './meta'
 import * as equal from './equal'
 import * as optional from './optional'
 import * as predicate from './predicate'
+import * as compose from './compose'
 
 export type LazySequence<T> = () => Sequence<T>
 
@@ -48,7 +49,7 @@ export const accumulator
             : (_: R) => State<T, R>
             = value => ({
                 value,
-                next: v => main(reduce(value)(v))
+                next: compose.pipe(reduce(value))(main)
             })
         return main
     }
@@ -68,7 +69,7 @@ export type FlatState<T, R> = State<T, Sequence<R>>
 
 export const flatScan
     : <T, R>(_: FlatState<T, R>) => (_: Sequence<T>) => Sequence<R>
-    = state => sequence => flatten(exclusiveScan(state)(sequence))
+    = state => compose.pipe(exclusiveScan(state))(flatten)
 
 export type FilterState<T> = State<T, boolean>
 
@@ -182,7 +183,7 @@ export const last
 
 export const exclusiveFold
     : <T, R>(_: State<T, R>) => (_: Sequence<T>) => R
-    = state => sequence => last(exclusiveScan(state)(sequence))
+    = state => compose.pipe(exclusiveScan(state))(last)
 
 const push
     : <T>(_: readonly T[]) => (_: T) => readonly T[]

@@ -98,7 +98,7 @@ describe('add', () => {
             ])
         const b: intervalSequence.Interval<number, number> = {
             min: 1,
-            max: 2,
+            excludedMax: 2,
             value: 15,
         }
         const r = intervalSequence.add(strategyN)(a)(b)
@@ -119,7 +119,7 @@ describe('add', () => {
         ])
         const b: intervalSequence.Interval<number, number> = {
             min: 6,
-            max: 10,
+            excludedMax: 10,
             value: 15,
         }
         const r = intervalSequence.add(strategyN)(a)(b)
