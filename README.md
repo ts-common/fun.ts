@@ -14,7 +14,7 @@ The subset can be used as a safe script or as a target platform for other progra
 
 ## Potential Targets and Applications
 
-- Markdown safe script that can be run in a browser,
+- Markdown safe script that can be run in a browser (for example http://madoko.org/reference.html),
 - query languages,
 - distributed systems, like [ALIQ](https://github.com/aliq-lang/), machine learning, AI,
 - as a target platform for other functional languages.
