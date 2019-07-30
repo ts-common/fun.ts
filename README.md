@@ -14,7 +14,7 @@ The subset can be used as a safe script or as a target platform for other progra
 
 ## Potential Targets and Applications
 
-- Markdown safe script that can be run in a browser,
+- Markdown safe script that can be run in a browser (for example http://madoko.org/reference.html),
 - query languages,
 - distributed systems, like [ALIQ](https://github.com/aliq-lang/), machine learning, AI,
 - as a target platform for other functional languages.
@@ -130,6 +130,12 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 - http://dippl.org/chapters/02-webppl.html
 - https://github.com/gcanti/fp-ts
 - https://github.com/jonaskello/tslint-immutable
+
+## Languages
+
+- [ELM](https://elm-lang.org/)
+- [Koka](https://www.rise4fun.com/koka/tutorial)
+- [PureScript](http://www.purescript.org/)
 
 ## ECMAScript Proposals
 
