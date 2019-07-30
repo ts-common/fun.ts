@@ -64,6 +64,12 @@ export const exclusiveScan
         rest: () => inclusiveScan(next)(sequence)
     })
 
+export type FlatState<T, R> = State<T, Sequence<R>>
+
+export const flatScan
+    : <T, R>(_: FlatState<T, R>) => (_: Sequence<T>) => Sequence<R>
+    = state => sequence => flatten(exclusiveScan(state)(sequence))
+
 export type FilterState<T> = State<T, boolean>
 
 export type NextFilterState<T> = NextState<T, boolean>
