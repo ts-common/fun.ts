@@ -131,6 +131,12 @@ const m = Object.prototype.hasOwnProperty.call(x, 'constructor') ? x.constructor
 - https://github.com/gcanti/fp-ts
 - https://github.com/jonaskello/tslint-immutable
 
+## Languages
+
+- [ELM](https://elm-lang.org/)
+- [Koka](https://www.rise4fun.com/koka/tutorial)
+- [PureScript](http://www.purescript.org/)
+
 ## ECMAScript Proposals
 
 - https://github.com/tc39/proposal-pattern-matching
