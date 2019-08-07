@@ -201,3 +201,19 @@ describe('dropWhile', () => {
             .toStrictEqual([2, 3, 4])
     })
 })
+
+describe('flatScan', () => {
+    it('accumulate', () => {
+        const input = sequence.fromArray([[7, 9], [4, 5]])
+        const createState
+            : (_: sequence.Sequence<number>) => sequence.FlatState<readonly number[], number>
+            = value => ({
+                value,
+                next: s => createState(sequence.concat(value)(sequence.fromArray(s))),
+            })
+        const state = createState(sequence.fromArray([6, 3]))
+        const result = sequence.toArray(sequence.flatScan(state)(input))
+        expect(result)
+            .toStrictEqual([6, 3, 6, 3, 7, 9, 6, 3, 7, 9, 4, 5])
+    })
+})

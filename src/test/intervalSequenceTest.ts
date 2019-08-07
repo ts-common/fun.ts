@@ -2,6 +2,7 @@
 import * as intervalSequence from '../intervalSequence'
 import * as sequence from '../sequence'
 import { IntervalSequenceS, mergeS, IntervalSequenceN, mergeN, strategyN } from './intervalSequenceStrategy'
+import * as equal from '../equal'
 
 describe('merge', () => {
     it('empty', () => {
@@ -98,7 +99,7 @@ describe('add', () => {
             ])
         const b: intervalSequence.Interval<number, number> = {
             min: 1,
-            max: 2,
+            excludedMax: 2,
             value: 15,
         }
         const r = intervalSequence.add(strategyN)(a)(b)
@@ -119,7 +120,7 @@ describe('add', () => {
         ])
         const b: intervalSequence.Interval<number, number> = {
             min: 6,
-            max: 10,
+            excludedMax: 10,
             value: 15,
         }
         const r = intervalSequence.add(strategyN)(a)(b)
@@ -133,5 +134,41 @@ describe('add', () => {
                 { min: 6, value: 15 },
                 { min: 10, value: 2 }
             ])
+    })
+})
+
+describe('map', () => {
+    describe('empty', () => {
+        const i = intervalSequence.fromArray('Hello')([])
+        const f
+            : (_: string) => number
+            = v => v.length
+        const result = intervalSequence.map(equal.strictEqual)(f)(i)
+        expect(result.first.value)
+            .toBe(5)
+        expect(result.rest())
+            .toBeUndefined()
+    })
+    describe('map', () => {
+        const i = intervalSequence.fromArray('Hello')([{ min: 3, value: 'A'}])
+        const f
+            : (_: string) => number
+            = v => v.length
+        const result = intervalSequence.map(equal.strictEqual)(f)(i)
+        expect(result.first.value)
+            .toBe(5)
+        expect(sequence.toArray(result.rest()))
+            .toStrictEqual([{ min: 3, value: 1 }])
+    })
+    describe('dedup', () => {
+        const i = intervalSequence.fromArray('Hello')([{ min: 3, value: 'Hex12'}, { min: 4, value: 'Oct34' }])
+        const f
+            : (_: string) => number
+            = v => v.length
+        const result = intervalSequence.map(equal.strictEqual)(f)(i)
+        expect(result.first.value)
+            .toBe(5)
+        expect(result.rest())
+            .toBeUndefined()
     })
 })
