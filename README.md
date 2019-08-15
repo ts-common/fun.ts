@@ -4,7 +4,7 @@
 
 Purely functional subset of JavaScripts/TypeScript.
 
-There are a lot of pure functional languages that can be compiled to JavaScript. Usually, the biggest problem with these libraries is interoperability. For example, if you have a big project written on JavaScript, it's very challenging to rewrite parts of this project step-by-step using another language. https://github.com/jashkenas/coffeescript/wiki/List-of-languages-that-compile-to-JS#static-typing.
+There are a lot of pure functional languages that can be compiled to JavaScript. Usually, the biggest problem with these languages is interoperability. For example, if you have a big project written on JavaScript, it's very challenging to rewrite parts of this project step-by-step using another language. https://github.com/jashkenas/coffeescript/wiki/List-of-languages-that-compile-to-JS#static-typing.
 
 The project is not another functional language that can be compiled into JavaScript. The project tries to define a subset of JavaScript that can be formally verified.
 
